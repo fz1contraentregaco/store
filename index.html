@@ -3,48 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contraentregaco FZ1</title>
+    <title>Contraentregaco FZ1 - Sistema Integral</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #4e73df;
-            --dark-color: #2c3e50;
+            --secondary-color: #2c3e50;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fc;
         }
         
-        .video-container {
+        .auth-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 2rem;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background-color: white;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-color) 10%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            color: white;
+            width: 14rem;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-brand {
+            height: 4.375rem;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            letter-spacing: 0.05rem;
+            z-index: 1;
+            color: white;
+        }
+        
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 0 1rem 1rem;
+        }
+        
+        .sidebar-heading {
+            padding: 0 1rem;
+            font-weight: 800;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .nav-item {
             position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            margin-bottom: 30px;
-            background-color: #000;
-            border-radius: 8px;
         }
         
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        
+        .nav-link:hover {
+            color: white;
+        }
+        
+        .nav-link i {
+            margin-right: 0.25rem;
+        }
+        
+        .active {
+            color: white !important;
+        }
+        
+        .topbar {
+            height: 4.375rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background-color: white;
+        }
+        
+        .topbar #sidebarToggle {
+            color: #d1d3e2;
+        }
+        
+        .topbar .dropdown-list {
+            padding: 0;
+            border: none;
+            overflow: hidden;
+            width: 20rem;
+        }
+        
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            margin-bottom: 1.5rem;
             border: none;
         }
         
-        .feature {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 4rem;
-            height: 4rem;
-            font-size: 2rem;
-            margin-bottom: 1rem;
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .bg-success {
+            background-color: var(--success-color) !important;
+        }
+        
+        .bg-info {
+            background-color: var(--info-color) !important;
+        }
+        
+        .bg-warning {
+            background-color: var(--warning-color) !important;
+        }
+        
+        .bg-danger {
+            background-color: var(--danger-color) !important;
+        }
+        
+        .chart-area {
+            position: relative;
+            height: 10rem;
+            width: 100%;
+        }
+        
+        .chart-pie {
+            position: relative;
+            height: 15rem;
+            width: 100%;
         }
         
         .page-section {
@@ -55,278 +161,1480 @@
             display: block;
         }
         
-        .auth-container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            background-color: white;
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+            padding-left: 1.5rem;
+            border-left: 1px solid #e3e6f0;
+        }
+        
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .tracking-container {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 0.35rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .carrier-logo {
+            height: 2.5rem;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+            filter: brightness(0) invert(1);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 6.5rem;
+                overflow: hidden;
+            }
+            .sidebar .nav-link span {
+                display: none;
+            }
+            .sidebar .sidebar-brand .sidebar-brand-text {
+                display: none;
+            }
+            .sidebar .sidebar-brand .sidebar-brand-icon {
+                display: block;
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
     <!-- Database simulation (JSON) -->
     <script id="app-data" type="application/json">
         {
-            "users": [
-                {"username": "admin", "password": "admin123", "key": "ABC123"},
-                {"username": "user1", "password": "pass123", "key": "XYZ789"}
+            "validKeys": [
+                "CONTR4ENTREG4CO2023FZ1",
+                "LOG1ST1C4PR1V4T3K3Y",
+                "WMSMULT1CL1ENT3SYSTEM",
+                "3NTR3G4S3GUR1D4S2023",
+                "C0NTR4S3N14PR1V4T3K3Y"
             ],
-            "content": {
-                "home": {
-                    "title": "Bienvenido al Sistema",
-                    "description": "Sistema de gestión integral para tu negocio."
+            "inventory": [
+                {
+                    "id": "INV-1001",
+                    "product": "Smartphone X Pro",
+                    "sku": "SMX-PRO-256",
+                    "quantity": 150,
+                    "location": "A12-B5",
+                    "account": "TechImport",
+                    "status": "Disponible",
+                    "value": 899.99
                 },
-                "features": {
-                    "title": "Nuestras Características",
-                    "items": [
-                        {
-                            "icon": "bi-collection",
-                            "title": "Gestión Completa",
-                            "description": "Control total sobre todos tus procesos empresariales."
-                        },
-                        {
-                            "icon": "bi-building",
-                            "title": "Multiplataforma",
-                            "description": "Accede desde cualquier dispositivo en cualquier momento."
-                        },
-                        {
-                            "icon": "bi-toggles2",
-                            "title": "Personalizable",
-                            "description": "Adapta el sistema a tus necesidades específicas."
-                        }
-                    ]
+                {
+                    "id": "INV-1002",
+                    "product": "Laptop Ultralight",
+                    "sku": "LT-ULTRA-512",
+                    "quantity": 75,
+                    "location": "B7-C3",
+                    "account": "DigitalPlus",
+                    "status": "Disponible",
+                    "value": 1299.99
                 },
-                "pricing": {
-                    "title": "Planes de Suscripción",
-                    "description": "Elige el plan que mejor se adapte a tus necesidades",
-                    "plans": [
-                        {
-                            "name": "Básico",
-                            "price": "$0",
-                            "period": "/mes",
-                            "features": [
-                                "1 usuario",
-                                "5GB almacenamiento",
-                                "Proyectos públicos ilimitados",
-                                "Acceso a la comunidad"
-                            ],
-                            "limitations": [
-                                "Proyectos privados",
-                                "Soporte prioritario",
-                                "Dominio personalizado"
-                            ],
-                            "button": "Registrarse"
-                        },
-                        {
-                            "name": "PRO",
-                            "price": "$9",
-                            "period": "/mes",
-                            "features": [
-                                "5 usuarios",
-                                "10GB almacenamiento",
-                                "Proyectos ilimitados",
-                                "Soporte prioritario",
-                                "Dominio personalizado"
-                            ],
-                            "limitations": [
-                                "Reportes mensuales"
-                            ],
-                            "button": "Actualizar a PRO"
-                        },
-                        {
-                            "name": "Empresarial",
-                            "price": "$49",
-                            "period": "/mes",
-                            "features": [
-                                "Usuarios ilimitados",
-                                "Almacenamiento ilimitado",
-                                "Todos los features PRO",
-                                "Reportes mensuales",
-                                "Soporte 24/7"
-                            ],
-                            "limitations": [],
-                            "button": "Contactar ventas"
-                        }
-                    ]
+                {
+                    "id": "INV-1003",
+                    "product": "Smart TV 55\" 4K",
+                    "sku": "TV55-4K-UHD",
+                    "quantity": 42,
+                    "location": "C15-A2",
+                    "account": "ElectroWorld",
+                    "status": "Reservado",
+                    "value": 599.99
+                },
+                {
+                    "id": "INV-1004",
+                    "product": "Drone Pro 4K",
+                    "sku": "DRN-PRO-4K",
+                    "quantity": 28,
+                    "location": "D9-E7",
+                    "account": "TechImport",
+                    "status": "Disponible",
+                    "value": 499.99
+                },
+                {
+                    "id": "INV-1005",
+                    "product": "Tablet Android 10\"",
+                    "sku": "TAB-AND-10",
+                    "quantity": 63,
+                    "location": "E3-F8",
+                    "account": "DigitalPlus",
+                    "status": "Disponible",
+                    "value": 299.99
+                },
+                {
+                    "id": "INV-1006",
+                    "product": "Smartwatch Pro",
+                    "sku": "SW-PRO-2023",
+                    "quantity": 120,
+                    "location": "F12-G5",
+                    "account": "ElectroWorld",
+                    "status": "Disponible",
+                    "value": 199.99
+                },
+                {
+                    "id": "INV-1007",
+                    "product": "Auriculares Bluetooth",
+                    "sku": "AUR-BT-NC",
+                    "quantity": 210,
+                    "location": "G7-H2",
+                    "account": "TechImport",
+                    "status": "Disponible",
+                    "value": 149.99
+                },
+                {
+                    "id": "INV-1008",
+                    "product": "Altavoz Inteligente",
+                    "sku": "SPK-SMART-AI",
+                    "quantity": 85,
+                    "location": "H4-I9",
+                    "account": "DigitalPlus",
+                    "status": "Reservado",
+                    "value": 129.99
                 }
-            }
+            ],
+            "shipments": [
+                {
+                    "trackingNumber": "TRK123456789",
+                    "carrier": "DHL",
+                    "origin": "Miami, FL",
+                    "destination": "Madrid, España",
+                    "status": "En tránsito",
+                    "estimatedDelivery": "2023-12-15",
+                    "lastUpdate": "2023-12-10 14:30",
+                    "progress": 50
+                },
+                {
+                    "trackingNumber": "TRK987654321",
+                    "carrier": "FedEx",
+                    "origin": "Nueva York, NY",
+                    "destination": "Bogotá, Colombia",
+                    "status": "En aduana",
+                    "estimatedDelivery": "2023-12-18",
+                    "lastUpdate": "2023-12-12 09:15",
+                    "progress": 30
+                },
+                {
+                    "trackingNumber": "TRK567891234",
+                    "carrier": "UPS",
+                    "origin": "Los Ángeles, CA",
+                    "destination": "Ciudad de México, México",
+                    "status": "Entregado",
+                    "estimatedDelivery": "2023-12-05",
+                    "lastUpdate": "2023-12-05 16:45",
+                    "progress": 100
+                }
+            ],
+            "policies": [
+                {
+                    "title": "Política de Privacidad",
+                    "content": "En Contraentregaco FZ1, nos comprometemos a proteger la privacidad de nuestros clientes. Toda la información personal recopilada se utiliza únicamente para los fines establecidos en nuestros servicios y no se comparte con terceros sin consentimiento expreso."
+                },
+                {
+                    "title": "Términos de Servicio",
+                    "content": "Al utilizar nuestros servicios, usted acepta cumplir con todos los términos y condiciones establecidos. Nos reservamos el derecho de modificar estos términos en cualquier momento y es responsabilidad del cliente revisarlos periódicamente."
+                },
+                {
+                    "title": "Política de Envíos",
+                    "content": "Los tiempos de entrega son estimados y pueden variar según condiciones fuera de nuestro control. No nos hacemos responsables por retrasos causados por fuerzas mayores, condiciones climáticas o procesos aduaneros."
+                },
+                {
+                    "title": "Garantías y Devoluciones",
+                    "content": "Aceptamos devoluciones dentro de los 30 días posteriores a la recepción, siempre que los productos estén en su estado original. Algunos productos pueden tener políticas de devolución diferentes según el fabricante."
+                }
+            ]
         }
     </script>
 
-    <!-- App Container -->
-    <div id="app-container">
-        <!-- Login Section -->
-        <section id="login-section" class="py-5">
-            <div class="container">
-                <div class="auth-container">
-                    <h2 class="text-center mb-4">Acceso al Sistema</h2>
-                    <form id="login-form">
-                        <div class="mb-3">
-                            <label for="login-key" class="form-label">Clave Privada</label>
-                            <input type="password" class="form-control" id="login-key" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="login-username" class="form-label">Usuario</label>
-                            <input type="text" class="form-control" id="login-username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="login-password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="login-password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                        <div class="text-center mt-3">
-                            <a href="#" onclick="showSection('register-section')">¿No tienes cuenta? Regístrate</a>
-                        </div>
-                    </form>
-                </div>
+    <!-- Login Section -->
+    <div id="login-section">
+        <div class="auth-container">
+            <div class="text-center mb-4">
+                <h1 class="h4 text-gray-900">Contraentregaco FZ1</h1>
+                <p class="mb-0">Sistema Integral de Logística</p>
             </div>
-        </section>
-
-        <!-- Register Section -->
-        <section id="register-section" class="py-5" style="display:none;">
-            <div class="container">
-                <div class="auth-container">
-                    <h2 class="text-center mb-4">Registro de Usuario</h2>
-                    <form id="register-form">
-                        <div class="mb-3">
-                            <label for="register-key" class="form-label">Clave Privada</label>
-                            <input type="password" class="form-control" id="register-key" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="register-username" class="form-label">Usuario</label>
-                            <input type="text" class="form-control" id="register-username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="register-password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="register-password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="register-confirm" class="form-label">Confirmar Contraseña</label>
-                            <input type="password" class="form-control" id="register-confirm" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Registrarse</button>
-                        <div class="text-center mt-3">
-                            <a href="#" onclick="showSection('login-section')">¿Ya tienes cuenta? Inicia sesión</a>
-                        </div>
-                    </form>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label for="private-key" class="form-label">Clave Privada de Acceso</label>
+                    <input type="password" class="form-control" id="private-key" required>
                 </div>
-            </div>
-        </section>
+                <button type="submit" class="btn btn-primary w-100">Acceder</button>
+                <div class="text-center mt-3">
+                    <a href="https://contraentregaco.com/registro" class="small">¿No tiene clave? Solicite registro</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <!-- Main App (hidden until login) -->
-        <div id="main-app" style="display:none;">
+    <!-- Main Application (hidden until login) -->
+    <div id="main-app" style="display:none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+                <div class="sidebar-brand-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Contraentregaco</div>
+            </a>
+            <div class="sidebar-divider"></div>
+            
             <!-- Navigation -->
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <div class="container px-5">
-                    <a class="navbar-brand" href="#" onclick="showPage('home-page')">Contraentregaco FZ1</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="main-nav">
-                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#" onclick="showPage('home-page')">Inicio</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" onclick="showPage('features-page')">Características</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" onclick="showPage('pricing-page')">Precios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" onclick="showPage('video-page')">Video</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" onclick="logout()">Cerrar sesión</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+            <div class="sidebar-heading">Principal</div>
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showPage('dashboard-page')">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <div class="sidebar-heading">Operaciones</div>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showPage('wms-page')">
+                    <i class="bi bi-clipboard-data"></i>
+                    <span>WMS Local</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showPage('logistics-page')">
+                    <i class="bi bi-truck"></i>
+                    <span>Logística</span>
+                </a>
+            </li>
+            
+            <div class="sidebar-heading">Inventario</div>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showPage('inventory-page')">
+                    <i class="bi bi-boxes"></i>
+                    <span>Stock Global</span>
+                </a>
+            </li>
+            
+            <div class="sidebar-heading">Administración</div>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showPage('policies-page')">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Políticas</span>
+                </a>
+            </li>
+        </div>
 
-            <!-- Pages -->
-            <div id="pages-container">
-                <!-- Home Page -->
-                <section id="home-page" class="page-section py-5 active">
-                    <header class="bg-dark py-5">
-                        <div class="container px-5">
-                            <div class="row gx-5 justify-content-center">
-                                <div class="col-lg-6">
-                                    <div class="text-center my-5">
-                                        <h1 class="display-5 fw-bolder text-white mb-2" id="home-title">Bienvenido al Sistema</h1>
-                                        <p class="lead text-white-50 mb-4" id="home-description">Sistema de gestión integral para tu negocio.</p>
-                                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                                            <a class="btn btn-primary btn-lg px-4 me-sm-3" href="#" onclick="showPage('features-page')">Ver características</a>
-                                            <a class="btn btn-outline-light btn-lg px-4" href="#" onclick="showPage('pricing-page')">Ver planes</a>
+        <!-- Content Wrapper -->
+        <div id="content-wrapper">
+            <!-- Topbar -->
+            <nav class="topbar navbar navbar-expand navbar-light bg-white mb-4 static-top">
+                <button id="sidebarToggle" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown">
+                            <i class="bi bi-bell"></i>
+                            <span class="badge badge-danger badge-counter">3+</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown">
+                            <i class="bi bi-envelope"></i>
+                            <span class="badge badge-danger badge-counter">7</span>
+                        </a>
+                    </li>
+                    
+                    <div class="topbar-divider d-none d-sm-block"></div>
+                    
+                    <!-- Nav Item - User Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">Usuario Autorizado</span>
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-person mr-2 text-gray-400"></i>
+                                Perfil
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-gear mr-2 text-gray-400"></i>
+                                Configuración
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="bi bi-box-arrow-right mr-2 text-gray-400"></i>
+                                Cerrar sesión
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid" id="pages-container">
+                <!-- Dashboard Page -->
+                <section id="dashboard-page" class="page-section active">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i class="bi bi-download text-white-50"></i> Generar Reporte
+                        </a>
+                    </div>
+                    
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Envíos (Mes)</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">147</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-truck fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </header>
-                </section>
-
-                <!-- Features Page -->
-                <section id="features-page" class="page-section py-5 border-bottom">
-                    <div class="container px-5 my-5">
-                        <div class="text-center mb-5">
-                            <h2 class="fw-bolder" id="features-title">Nuestras Características</h2>
-                        </div>
-                        <div class="row gx-5" id="features-container">
-                            <!-- Features will be loaded here -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Pricing Page -->
-                <section id="pricing-page" class="page-section bg-light py-5 border-bottom">
-                    <div class="container px-5 my-5">
-                        <div class="text-center mb-5">
-                            <h2 class="fw-bolder" id="pricing-title">Planes de Suscripción</h2>
-                            <p class="lead mb-0" id="pricing-description">Elige el plan que mejor se adapte a tus necesidades</p>
-                        </div>
-                        <div class="row gx-5 justify-content-center" id="pricing-container">
-                            <!-- Pricing plans will be loaded here -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Video Page -->
-                <section id="video-page" class="page-section py-5">
-                    <div class="container px-5 my-5">
-                        <div class="row gx-5 justify-content-center">
-                            <div class="col-lg-8 col-xl-6">
-                                <div class="text-center">
-                                    <h2 class="fw-bolder">Video Demostración</h2>
-                                    <p class="lead fw-normal text-muted mb-5">Mira cómo funciona nuestro producto</p>
+                        
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Inventario Total</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$243,560</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-box-seam fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row gx-5 justify-content-center">
-                            <div class="col-lg-10">
-                                <div class="video-container">
-                                    <!-- Replace with your actual video file -->
-                                    <iframe src="video.mp4" allowfullscreen></iframe>
+                        
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Órdenes Pendientes</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">24</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-clipboard-check fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pending Requests Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Alertas</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">5</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Area Chart -->
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Resumen de Envíos Mensuales</h6>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-area">
+                                        <canvas id="shipmentsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pie Chart -->
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Distribución de Inventario</h6>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="inventoryChart"></canvas>
+                                    </div>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-primary"></i> TechImport
+                                        </span>
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-success"></i> DigitalPlus
+                                        </span>
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-info"></i> ElectroWorld
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Recent Shipments -->
+                        <div class="col-lg-12 mb-4">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Envíos Recientes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="recentShipmentsTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>N° Seguimiento</th>
+                                                    <th>Transportista</th>
+                                                    <th>Origen</th>
+                                                    <th>Destino</th>
+                                                    <th>Estado</th>
+                                                    <th>Entrega Estimada</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="recent-shipments-body">
+                                                <!-- Shipments will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- WMS Page -->
+                <section id="wms-page" class="page-section">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Warehouse Management System</h1>
+                        <div>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                <i class="bi bi-plus-circle text-white-50"></i> Nueva Orden
+                            </a>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2">
+                                <i class="bi bi-printer text-white-50"></i> Imprimir Etiquetas
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Warehouse Overview -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Resumen de Almacén</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 15rem;" src="https://cdn-icons-png.flaticon.com/512/1534/1534935.png" alt="Warehouse">
+                                    </div>
+                                    <p>Ubicación: Zona Franca 123, Miami, FL</p>
+                                    <p>Capacidad: 15,000 m²</p>
+                                    <p>Zonas: Recepción, Almacenaje, Preparación, Expedición</p>
+                                    <a href="#" class="btn btn-primary btn-block">Ver Mapa del Almacén</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Operations -->
+                        <div class="col-lg-8 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Operaciones en Curso</h6>
+                                    <div class="dropdown no-arrow">
+                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical text-gray-400"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card border-left-primary shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                Recepciones Pendientes</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">8</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="bi bi-box-arrow-in-down fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card border-left-success shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                                Órdenes de Picking</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">14</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="bi bi-cart-check fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card border-left-info shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                                Envíos para Expedición</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">6</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="bi bi-truck fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card border-left-warning shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                                Inventarios Pendientes</div>
+                                                            <div class="h5 mb-0 font-weight-bold text-gray-800">3</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="bi bi-clipboard-data fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h5 class="font-weight-bold text-primary">Alertas Recientes</h5>
+                                        <div class="timeline">
+                                            <div class="timeline-item">
+                                                <h6>Stock bajo en SKU: LT-ULTRA-512</h6>
+                                                <p class="text-muted">Hoy, 10:45 AM</p>
+                                                <p>Quedan solo 5 unidades en inventario</p>
+                                            </div>
+                                            <div class="timeline-item">
+                                                <h6>Retraso en recepción #REC-2345</h6>
+                                                <p class="text-muted">Ayer, 3:30 PM</p>
+                                                <p>La recepción programada para las 2PM no ha llegado</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Orders Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Órdenes Activas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="wmsOrdersTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>N° Orden</th>
+                                            <th>Cliente</th>
+                                            <th>Fecha Creación</th>
+                                            <th>Prioridad</th>
+                                            <th>Estado</th>
+                                            <th>Items</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>ORD-10023</td>
+                                            <td>TechImport</td>
+                                            <td>2023-12-10</td>
+                                            <td><span class="badge badge-warning">Media</span></td>
+                                            <td><span class="badge badge-primary">En picking</span></td>
+                                            <td>5</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Detalles</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ORD-10024</td>
+                                            <td>DigitalPlus</td>
+                                            <td>2023-12-10</td>
+                                            <td><span class="badge badge-danger">Alta</span></td>
+                                            <td><span class="badge badge-secondary">Pendiente</span></td>
+                                            <td>8</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Detalles</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ORD-10025</td>
+                                            <td>ElectroWorld</td>
+                                            <td>2023-12-09</td>
+                                            <td><span class="badge badge-success">Baja</span></td>
+                                            <td><span class="badge badge-success">Empaquetado</span></td>
+                                            <td>3</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Detalles</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ORD-10026</td>
+                                            <td>TechImport</td>
+                                            <td>2023-12-09</td>
+                                            <td><span class="badge badge-danger">Alta</span></td>
+                                            <td><span class="badge badge-warning">En verificación</span></td>
+                                            <td>12</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Detalles</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Logistics Page -->
+                <section id="logistics-page" class="page-section">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Gestión Logística</h1>
+                        <div>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="showShippingForm()">
+                                <i class="bi bi-plus-circle text-white-50"></i> Nueva Recogida
+                            </a>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2">
+                                <i class="bi bi-printer text-white-50"></i> Imprimir Guías
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tracking Section -->
+                    <div class="tracking-container">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2><i class="bi bi-geo-alt-fill"></i> Rastreo Internacional de Envíos</h2>
+                                <p class="mb-0">Seguimiento en tiempo real con más de 900 transportistas globales</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png" class="carrier-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/FedEx_Express.svg/2560px-FedEx_Express.svg.png" class="carrier-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/DHL_Express_logo.svg/2560px-DHL_Express_logo.svg.png" class="carrier-logo">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-8">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="tracking-number" class="form-control form-control-lg" placeholder="Ingrese número de guía (ej: 123456789ABCD)">
+                                    <button class="btn btn-light btn-lg" type="button" id="track-button">
+                                        <i class="bi bi-search"></i> Rastrear
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-lg" id="carrier-select">
+                                    <option value="">Seleccione transportista</option>
+                                    <option value="fedex">FedEx</option>
+                                    <option value="dhl">DHL</option>
+                                    <option value="ups">UPS</option>
+                                    <option value="usps">USPS</option>
+                                    <option value="amazon">Amazon Logistics</option>
+                                    <option value="correos">Correos</option>
+                                    <option value="other">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="tracking-results" class="mt-4 hidden">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estado del envío: <span id="status-text">En tránsito</span></h5>
+                                    <div class="progress mt-3 mb-3" style="height: 10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="status-progress" style="width: 50%"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Origen:</strong> <span id="origin-text">Miami, FL, USA</span></p>
+                                            <p><strong>Destino:</strong> <span id="destination-text">Madrid, España</span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Fecha estimada:</strong> <span id="eta-text">15 Ene 2024</span></p>
+                                            <p><strong>Última actualización:</strong> <span id="last-update-text">10 Ene 2024 14:30</span></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline mt-4">
+                                        <div class="timeline-item">
+                                            <div class="timeline-point"></div>
+                                            <div class="timeline-content">
+                                                <h6>En tránsito</h6>
+                                                <p class="text-muted">10 Ene 2024 14:30</p>
+                                                <p>El paquete ha salido del centro de distribución en Miami</p>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="timeline-point"></div>
+                                            <div class="timeline-content">
+                                                <h6>Procesado</h6>
+                                                <p class="text-muted">9 Ene 2024 09:15</p>
+                                                <p>El paquete ha sido procesado en el centro logístico</p>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <div class="timeline-point"></div>
+                                            <div class="timeline-content">
+                                                <h6>Recogido</h6>
+                                                <p class="text-muted">8 Ene 2024 16:45</p>
+                                                <p>El paquete ha sido recogido por el transportista</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Form (Initially Hidden) -->
+                    <div id="shipping-form-container" class="hidden">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">Nueva Orden de Recogida</h6>
+                                <button type="button" class="close" onclick="hideShippingForm()">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <form id="shipping-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+                                    <input type="hidden" name="_cc" value="notificaciones@contraentregaco.com">
+                                    <input type="hidden" name="_subject" value="Nueva solicitud de recogida">
+                                    <input type="hidden" name="_redirect" value="https://contraentregaco.com/gracias.html">
+                                    
+                                    <!-- Step 1: Información del Remitente -->
+                                    <div class="step" id="step1">
+                                        <h4 class="mb-4 border-bottom pb-2">1. Información del Remitente</h4>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-name" class="form-label required-field">Nombre completo</label>
+                                                <input type="text" class="form-control" id="sender-name" name="sender-name" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-company" class="form-label">Empresa (opcional)</label>
+                                                <input type="text" class="form-control" id="sender-company" name="sender-company">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-email" class="form-label required-field">Email</label>
+                                                <input type="email" class="form-control" id="sender-email" name="sender-email" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-phone" class="form-label required-field">Teléfono</label>
+                                                <input type="tel" class="form-control" id="sender-phone" name="sender-phone" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-country" class="form-label required-field">País</label>
+                                                <select class="form-select" id="sender-country" name="sender-country" required>
+                                                    <option value="">Seleccionar país...</option>
+                                                    <option value="US">Estados Unidos</option>
+                                                    <option value="ES">España</option>
+                                                    <option value="MX">México</option>
+                                                    <option value="CO">Colombia</option>
+                                                    <option value="AR">Argentina</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sender-zip" class="form-label required-field">Código Postal</label>
+                                                <input type="text" class="form-control" id="sender-zip" name="sender-zip" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="sender-address" class="form-label required-field">Dirección completa</label>
+                                            <textarea class="form-control" id="sender-address" name="sender-address" rows="2" required></textarea>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-primary next-step" data-next="step2">Siguiente <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Step 2: Información del Destinatario -->
+                                    <div class="step hidden" id="step2">
+                                        <h4 class="mb-4 border-bottom pb-2">2. Información del Destinatario</h4>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="same-as-sender">
+                                            <label class="form-check-label" for="same-as-sender">Igual que el remitente</label>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-name" class="form-label required-field">Nombre completo</label>
+                                                <input type="text" class="form-control" id="recipient-name" name="recipient-name" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-company" class="form-label">Empresa (opcional)</label>
+                                                <input type="text" class="form-control" id="recipient-company" name="recipient-company">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="recipient-email" name="recipient-email">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-phone" class="form-label required-field">Teléfono</label>
+                                                <input type="tel" class="form-control" id="recipient-phone" name="recipient-phone" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-country" class="form-label required-field">País</label>
+                                                <select class="form-select" id="recipient-country" name="recipient-country" required>
+                                                    <option value="">Seleccionar país...</option>
+                                                    <option value="US">Estados Unidos</option>
+                                                    <option value="ES">España</option>
+                                                    <option value="MX">México</option>
+                                                    <option value="CO">Colombia</option>
+                                                    <option value="AR">Argentina</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="recipient-zip" class="form-label required-field">Código Postal</label>
+                                                <input type="text" class="form-control" id="recipient-zip" name="recipient-zip" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="recipient-address" class="form-label required-field">Dirección completa</label>
+                                            <textarea class="form-control" id="recipient-address" name="recipient-address" rows="2" required></textarea>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary prev-step" data-prev="step1"><i class="bi bi-arrow-left"></i> Anterior</button>
+                                            <button type="button" class="btn btn-primary next-step" data-next="step3">Siguiente <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Step 3: Detalles del Envío -->
+                                    <div class="step hidden" id="step3">
+                                        <h4 class="mb-4 border-bottom pb-2">3. Detalles del Envío</h4>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="shipping-date" class="form-label required-field">Fecha de recogida deseada</label>
+                                                <input type="date" class="form-control" id="shipping-date" name="shipping-date" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="shipping-time" class="form-label required-field">Franja horaria</label>
+                                                <select class="form-select" id="shipping-time" name="shipping-time" required>
+                                                    <option value="">Seleccionar...</option>
+                                                    <option value="morning">Mañana (9:00 - 13:00)</option>
+                                                    <option value="afternoon">Tarde (13:00 - 17:00)</option>
+                                                    <option value="evening">Todo el día (9:00 - 17:00)</option>
+                                                    <option value="specific">Horario específico (indicar en observaciones)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="package-type" class="form-label required-field">Tipo de paquete</label>
+                                                <select class="form-select" id="package-type" name="package-type" required>
+                                                    <option value="">Seleccionar...</option>
+                                                    <option value="document">Documentos</option>
+                                                    <option value="small">Paquete pequeño (hasta 1kg)</option>
+                                                    <option value="medium">Paquete mediano (1-5kg)</option>
+                                                    <option value="large">Paquete grande (5-20kg)</option>
+                                                    <option value="freight">Carga pesada (+20kg)</option>
+                                                    <option value="pallet">Palet</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="shipping-service" class="form-label required-field">Servicio de envío</label>
+                                                <select class="form-select" id="shipping-service" name="shipping-service" required>
+                                                    <option value="">Seleccionar...</option>
+                                                    <option value="express">Express (1-3 días)</option>
+                                                    <option value="standard">Estándar (3-7 días)</option>
+                                                    <option value="economy">Económico (7-14 días)</option>
+                                                    <option value="international">Internacional prioritario</option>
+                                                    <option value="fragile">Frágil/Especial</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="package-value" class="form-label required-field">Valor declarado (USD)</label>
+                                            <input type="number" class="form-control" id="package-value" name="package-value" min="0" step="0.01" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="package-description" class="form-label required-field">Descripción del contenido</label>
+                                            <textarea class="form-control" id="package-description" name="package-description" rows="3" required></textarea>
+                                            <div class="form-text">Descripción detallada de lo que contiene el paquete</div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary prev-step" data-prev="step2"><i class="bi bi-arrow-left"></i> Anterior</button>
+                                            <button type="button" class="btn btn-primary next-step" data-next="step4">Siguiente <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Step 4: Dimensiones y Peso -->
+                                    <div class="step hidden" id="step4">
+                                        <h4 class="mb-4 border-bottom pb-2">4. Dimensiones y Peso</h4>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label for="package-weight" class="form-label required-field">Peso (kg)</label>
+                                                <input type="number" class="form-control" id="package-weight" name="package-weight" min="0.1" step="0.1" required>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="package-length" class="form-label required-field">Largo (cm)</label>
+                                                <input type="number" class="form-control" id="package-length" name="package-length" min="1" required>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="package-width" class="form-label required-field">Ancho (cm)</label>
+                                                <input type="number" class="form-control" id="package-width" name="package-width" min="1" required>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label for="package-height" class="form-label required-field">Alto (cm)</label>
+                                                <input type="number" class="form-control" id="package-height" name="package-height" min="1" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label required-field">¿Requiere embalaje especial?</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="special-packaging" id="packaging-no" value="no" checked>
+                                                <label class="form-check-label" for="packaging-no">No, el paquete ya está embalado</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="special-packaging" id="packaging-yes" value="yes">
+                                                <label class="form-check-label" for="packaging-yes">Sí, necesito embalaje profesional</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3" id="packaging-type-container" style="display: none;">
+                                            <label for="packaging-type" class="form-label">Tipo de embalaje requerido</label>
+                                            <select class="form-select" id="packaging-type" name="packaging-type">
+                                                <option value="basic">Básico (caja + relleno)</option>
+                                                <option value="protective">Protector (burbuja + espuma)</option>
+                                                <option value="fragile">Frágil (doble caja + amortiguación)</option>
+                                                <option value="waterproof">Resistente al agua</option>
+                                                <option value="custom">Personalizado (describir en observaciones)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary prev-step" data-prev="step3"><i class="bi bi-arrow-left"></i> Anterior</button>
+                                            <button type="button" class="btn btn-primary next-step" data-next="step5">Siguiente <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Step 5: Seguros y Servicios Adicionales -->
+                                    <div class="step hidden" id="step5">
+                                        <h4 class="mb-4 border-bottom pb-2">5. Seguros y Servicios Adicionales</h4>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label required-field">Seguro de envío</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="insurance" id="insurance-none" value="none" checked>
+                                                <label class="form-check-label" for="insurance-none">No, gracias</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="insurance" id="insurance-basic" value="basic">
+                                                <label class="form-check-label" for="insurance-basic">Básico (hasta $100)</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="insurance" id="insurance-full" value="full">
+                                                <label class="form-check-label" for="insurance-full">Cobertura total (valor declarado)</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Servicios adicionales</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="signature-confirmation" name="signature-confirmation">
+                                                <label class="form-check-label" for="signature-confirmation">Confirmación de firma</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="delivery-confirmation" name="delivery-confirmation">
+                                                <label class="form-check-label" for="delivery-confirmation">Confirmación de entrega</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="temperature-control" name="temperature-control">
+                                                <label class="form-check-label" for="temperature-control">Control de temperatura</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="customs-help" name="customs-help">
+                                                <label class="form-check-label" for="customs-help">Asistencia con aduanas</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="special-instructions" class="form-label">Instrucciones especiales</label>
+                                            <textarea class="form-control" id="special-instructions" name="special-instructions" rows="3"></textarea>
+                                            <div class="form-text">Indique cualquier requisito especial para su envío</div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary prev-step" data-prev="step4"><i class="bi bi-arrow-left"></i> Anterior</button>
+                                            <button type="button" class="btn btn-primary next-step" data-next="step6">Siguiente <i class="bi bi-arrow-right"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Step 6: Revisión y Confirmación -->
+                                    <div class="step hidden" id="step6">
+                                        <h4 class="mb-4 border-bottom pb-2">6. Revisión y Confirmación</h4>
+                                        
+                                        <div class="card mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="mb-0">Resumen de su envío</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6>Remitente</h6>
+                                                        <p id="review-sender"></p>
+                                                        <p id="review-sender-address"></p>
+                                                        <p id="review-sender-contact"></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6>Destinatario</h6>
+                                                        <p id="review-recipient"></p>
+                                                        <p id="review-recipient-address"></p>
+                                                        <p id="review-recipient-contact"></p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6>Detalles del envío</h6>
+                                                        <p><strong>Fecha recogida:</strong> <span id="review-shipping-date"></span></p>
+                                                        <p><strong>Tipo paquete:</strong> <span id="review-package-type"></span></p>
+                                                        <p><strong>Servicio:</strong> <span id="review-shipping-service"></span></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6>Dimensiones</h6>
+                                                        <p><strong>Peso:</strong> <span id="review-package-weight"></span> kg</p>
+                                                        <p><strong>Dimensiones:</strong> <span id="review-package-dimensions"></span> cm</p>
+                                                        <p><strong>Valor declarado:</strong> $<span id="review-package-value"></span></p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <div>
+                                                    <h6>Servicios adicionales</h6>
+                                                    <p id="review-additional-services"></p>
+                                                    <p id="review-special-instructions"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="terms-accept" required>
+                                            <label class="form-check-label" for="terms-accept">Acepto los términos y condiciones del servicio</label>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary prev-step" data-prev="step5"><i class="bi bi-arrow-left"></i> Anterior</button>
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-check-circle"></i> Confirmar y Enviar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Shipments -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Envíos Activos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="activeShipmentsTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>N° Envío</th>
+                                            <th>Fecha</th>
+                                            <th>Remitente</th>
+                                            <th>Destinatario</th>
+                                            <th>Transportista</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>ENV-10023</td>
+                                            <td>2023-12-10</td>
+                                            <td>TechImport</td>
+                                            <td>ElectroTech Madrid</td>
+                                            <td>DHL</td>
+                                            <td><span class="badge badge-primary">En tránsito</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Rastrear</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ENV-10024</td>
+                                            <td>2023-12-09</td>
+                                            <td>DigitalPlus</td>
+                                            <td>TechSolutions Bogotá</td>
+                                            <td>FedEx</td>
+                                            <td><span class="badge badge-warning">En aduana</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Rastrear</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ENV-10025</td>
+                                            <td>2023-12-08</td>
+                                            <td>ElectroWorld</td>
+                                            <td>DigitalStore México</td>
+                                            <td>UPS</td>
+                                            <td><span class="badge badge-success">Entregado</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Detalles</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ENV-10026</td>
+                                            <td>2023-12-07</td>
+                                            <td>TechImport</td>
+                                            <td>GadgetHub Buenos Aires</td>
+                                            <td>DHL</td>
+                                            <td><span class="badge badge-primary">En tránsito</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info">Rastrear</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Inventory Page -->
+                <section id="inventory-page" class="page-section">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Stock Global</h1>
+                        <div>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                <i class="bi bi-plus-circle text-white-50"></i> Nuevo Ingreso
+                            </a>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2">
+                                <i class="bi bi-printer text-white-50"></i> Imprimir Reporte
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Inventory Filters -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Filtros de Inventario</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="filter-account" class="form-label">Cuenta</label>
+                                    <select class="form-select" id="filter-account">
+                                        <option value="">Todas</option>
+                                        <option value="TechImport">TechImport</option>
+                                        <option value="DigitalPlus">DigitalPlus</option>
+                                        <option value="ElectroWorld">ElectroWorld</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="filter-status" class="form-label">Estado</label>
+                                    <select class="form-select" id="filter-status">
+                                        <option value="">Todos</option>
+                                        <option value="Disponible">Disponible</option>
+                                        <option value="Reservado">Reservado</option>
+                                        <option value="Agotado">Agotado</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="filter-location" class="form-label">Ubicación</label>
+                                    <select class="form-select" id="filter-location">
+                                        <option value="">Todas</option>
+                                        <option value="A">Zona A</option>
+                                        <option value="B">Zona B</option>
+                                        <option value="C">Zona C</option>
+                                        <option value="D">Zona D</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" id="apply-filters">Aplicar Filtros</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Inventory Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Inventario Disponible</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="inventoryTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Producto</th>
+                                            <th>SKU</th>
+                                            <th>Cantidad</th>
+                                            <th>Ubicación</th>
+                                            <th>Cuenta</th>
+                                            <th>Estado</th>
+                                            <th>Valor Unitario</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventory-body">
+                                        <!-- Inventory items will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Inventory Summary -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Resumen por Cuenta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4">
+                                        <canvas id="accountInventoryChart"></canvas>
+                                    </div>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-primary"></i> TechImport
+                                        </span>
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-success"></i> DigitalPlus
+                                        </span>
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-info"></i> ElectroWorld
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Resumen por Estado</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4">
+                                        <canvas id="statusInventoryChart"></canvas>
+                                    </div>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-success"></i> Disponible
+                                        </span>
+                                        <span class="mr-2">
+                                            <i class="bi bi-circle-fill text-warning"></i> Reservado
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Policies Page -->
+                <section id="policies-page" class="page-section">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Políticas y Términos</h1>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <ul class="nav nav-tabs card-header-tabs" id="policiesTab" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="privacy-tab" data-toggle="tab" href="#privacy" role="tab">Privacidad</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="terms-tab" data-toggle="tab" href="#terms" role="tab">Términos</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="shipping-tab" data-toggle="tab" href="#shipping" role="tab">Envíos</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="returns-tab" data-toggle="tab" href="#returns" role="tab">Devoluciones</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-body">
+                                    <div class="tab-content" id="policiesTabContent">
+                                        <div class="tab-pane fade show active" id="privacy" role="tabpanel">
+                                            <h5 class="card-title">Política de Privacidad</h5>
+                                            <p class="card-text">En Contraentregaco FZ1, nos comprometemos a proteger la privacidad de nuestros clientes. Toda la información personal recopilada se utiliza únicamente para los fines establecidos en nuestros servicios y no se comparte con terceros sin consentimiento expreso.</p>
+                                            <p>Recopilamos información cuando:</p>
+                                            <ul>
+                                                <li>Usted se registra en nuestro sistema</li>
+                                                <li>Realiza una cotización o solicitud de servicio</li>
+                                                <li>Nos contacta para soporte o consultas</li>
+                                            </ul>
+                                            <p>Esta información puede incluir su nombre, dirección, información de contacto, detalles de pago y otra información necesaria para proveer nuestros servicios.</p>
+                                            <p>Utilizamos medidas de seguridad avanzadas para proteger sus datos contra accesos no autorizados, alteración o destrucción.</p>
+                                        </div>
+                                        <div class="tab-pane fade" id="terms" role="tabpanel">
+                                            <h5 class="card-title">Términos de Servicio</h5>
+                                            <p class="card-text">Al utilizar nuestros servicios, usted acepta cumplir con todos los términos y condiciones establecidos. Nos reservamos el derecho de modificar estos términos en cualquier momento y es responsabilidad del cliente revisarlos periódicamente.</p>
+                                            <p>Responsabilidades del cliente:</p>
+                                            <ul>
+                                                <li>Proveer información exacta y completa</li>
+                                                <li>Cumplir con todas las regulaciones de importación/exportación</li>
+                                                <li>Pagar los servicios dentro de los plazos establecidos</li>
+                                            </ul>
+                                            <p>Limitaciones de responsabilidad:</p>
+                                            <ul>
+                                                <li>No nos hacemos responsables por retrasos causados por eventos fuera de nuestro control</li>
+                                                <li>Los valores declarados están sujetos a verificación</li>
+                                                <li>Los tiempos de entrega son estimados</li>
+                                            </ul>
+                                        </div>
+                                        <div class="tab-pane fade" id="shipping" role="tabpanel">
+                                            <h5 class="card-title">Política de Envíos</h5>
+                                            <p class="card-text">Los tiempos de entrega son estimados y pueden variar según condiciones fuera de nuestro control. No nos hacemos responsables por retrasos causados por fuerzas mayores, condiciones climáticas o procesos aduaneros.</p>
+                                            <p>Restricciones de envío:</p>
+                                            <ul>
+                                                <li>No transportamos materiales peligrosos o ilegales</li>
+                                                <li>Algunos artículos pueden requerir embalaje especial</li>
+                                                <li>Los envíos internacionales están sujetos a inspección aduanera</li>
+                                            </ul>
+                                            <p>Seguros:</p>
+                                            <ul>
+                                                <li>Ofrecemos opciones de seguro para proteger su mercancía</li>
+                                                <li>Las reclamaciones requieren documentación adecuada</li>
+                                                <li>Existen límites en la cobertura para ciertos artículos</li>
+                                            </ul>
+                                        </div>
+                                        <div class="tab-pane fade" id="returns" role="tabpanel">
+                                            <h5 class="card-title">Política de Devoluciones</h5>
+                                            <p class="card-text">Aceptamos devoluciones dentro de los 30 días posteriores a la recepción, siempre que los productos estén en su estado original. Algunos productos pueden tener políticas de devolución diferentes según el fabricante.</p>
+                                            <p>Proceso de devolución:</p>
+                                            <ol>
+                                                <li>Solicitar autorización de devolución</li>
+                                                <li>Empaquetar los artículos de forma segura</li>
+                                                <li>Enviar con el transportista autorizado</li>
+                                                <li>Proporcionar número de seguimiento</li>
+                                            </ol>
+                                            <p>Condiciones:</p>
+                                            <ul>
+                                                <li>Los artículos deben estar sin usar y en empaque original</li>
+                                                <li>El cliente cubre los costos de envío de devolución</li>
+                                                <li>Los reembolsos se procesan en 5-10 días hábiles</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
-
-            <!-- Footer -->
-            <footer class="py-5 bg-dark">
-                <div class="container px-5">
-                    <p class="m-0 text-center text-white">Contraentregaco FZ1 &copy; 2023</p>
-                </div>
-            </footer>
+            <!-- /.container-fluid -->
         </div>
+        <!-- End of Content Wrapper -->
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap core JavaScript-->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JavaScript -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Select2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <!-- App Script -->
     <script>
@@ -336,10 +1644,10 @@
 
         // DOM Elements
         const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
         const loginSection = document.getElementById('login-section');
-        const registerSection = document.getElementById('register-section');
         const mainApp = document.getElementById('main-app');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
@@ -354,77 +1662,50 @@
             // Login form handler
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const key = document.getElementById('login-key').value;
-                const username = document.getElementById('login-username').value;
-                const password = document.getElementById('login-password').value;
+                const key = document.getElementById('private-key').value.trim();
                 
-                // Validate credentials
-                const user = appData.users.find(u => 
-                    u.key === key && 
-                    u.username === username && 
-                    u.password === password
-                );
-                
-                if (user) {
-                    currentUser = user;
-                    sessionStorage.setItem('currentUser', JSON.stringify(user));
+                // Validate key
+                if (appData.validKeys.includes(key)) {
+                    currentUser = { key: key };
+                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                     showMainApp();
                     loadContent();
-                    showPage('home-page');
+                    showPage('dashboard-page');
                 } else {
-                    alert('Credenciales incorrectas. Intente nuevamente.');
+                    alert('Clave privada incorrecta. Acceso denegado.');
                 }
             });
 
-            // Register form handler
-            registerForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const key = document.getElementById('register-key').value;
-                const username = document.getElementById('register-username').value;
-                const password = document.getElementById('register-password').value;
-                const confirm = document.getElementById('register-confirm').value;
-                
-                // Validate form
-                if (password !== confirm) {
-                    alert('Las contraseñas no coinciden.');
-                    return;
-                }
-                
-                if (appData.users.some(u => u.username === username)) {
-                    alert('El nombre de usuario ya existe.');
-                    return;
-                }
-                
-                // Add new user
-                const newUser = {
-                    username: username,
-                    password: password,
-                    key: key
-                };
-                
-                appData.users.push(newUser);
-                currentUser = newUser;
-                sessionStorage.setItem('currentUser', JSON.stringify(newUser));
-                
-                // Update the JSON data (simulated)
-                document.getElementById('app-data').textContent = JSON.stringify(appData);
-                
-                showMainApp();
-                loadContent();
-                showPage('home-page');
-            });
+            // Sidebar toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('toggled');
+                });
+            }
+
+            // Initialize DataTables
+            if ($('#recentShipmentsTable').length) {
+                $('#recentShipmentsTable').DataTable();
+            }
+            if ($('#wmsOrdersTable').length) {
+                $('#wmsOrdersTable').DataTable();
+            }
+            if ($('#activeShipmentsTable').length) {
+                $('#activeShipmentsTable').DataTable();
+            }
+            if ($('#inventoryTable').length) {
+                $('#inventoryTable').DataTable();
+            }
+
+            // Initialize Select2
+            if ($('#carrier-select').length) {
+                $('#carrier-select').select2();
+            }
         });
-
-        // Show section function
-        function showSection(sectionId) {
-            loginSection.style.display = sectionId === 'login-section' ? 'block' : 'none';
-            registerSection.style.display = sectionId === 'register-section' ? 'block' : 'none';
-        }
 
         // Show main app after login
         function showMainApp() {
             loginSection.style.display = 'none';
-            registerSection.style.display = 'none';
             mainApp.style.display = 'block';
         }
 
@@ -434,9 +1715,7 @@
             sessionStorage.removeItem('currentUser');
             mainApp.style.display = 'none';
             loginSection.style.display = 'block';
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-key').value = '';
+            document.getElementById('private-key').value = '';
         }
 
         // Show page function
@@ -445,82 +1724,439 @@
                 section.classList.remove('active');
             });
             document.getElementById(pageId).classList.add('active');
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Special case for WMS and Logistics which are in the same group
+            if (pageId === 'wms-page' || pageId === 'logistics-page') {
+                document.querySelector(`a[onclick="showPage('${pageId}')"]`).classList.add('active');
+            } else {
+                document.querySelector(`a[onclick="showPage('${pageId}')"]`).classList.add('active');
+            }
+            
+            // Load specific content for the page
+            if (pageId === 'dashboard-page') {
+                loadDashboard();
+            } else if (pageId === 'inventory-page') {
+                loadInventory();
+            }
         }
 
-        // Load content from JSON
-        function loadContent() {
-            // Load home content
-            document.getElementById('home-title').textContent = appData.content.home.title;
-            document.getElementById('home-description').textContent = appData.content.home.description;
+        // Load dashboard content
+        function loadDashboard() {
+            // Load recent shipments
+            const shipmentsBody = document.getElementById('recent-shipments-body');
+            shipmentsBody.innerHTML = '';
             
-            // Load features
-            const featuresContainer = document.getElementById('features-container');
-            featuresContainer.innerHTML = '';
-            
-            appData.content.features.items.forEach(feature => {
-                featuresContainer.innerHTML += `
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3">
-                            <i class="bi ${feature.icon}"></i>
-                        </div>
-                        <h2 class="h4 fw-bolder">${feature.title}</h2>
-                        <p>${feature.description}</p>
-                        <a class="text-decoration-none" href="#" onclick="showPage('pricing-page')">
-                            Ver planes
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                `;
-            });
-            
-            // Load pricing
-            document.getElementById('pricing-title').textContent = appData.content.pricing.title;
-            document.getElementById('pricing-description').textContent = appData.content.pricing.description;
-            
-            const pricingContainer = document.getElementById('pricing-container');
-            pricingContainer.innerHTML = '';
-            
-            appData.content.pricing.plans.forEach((plan, index) => {
-                const isPro = plan.name === 'PRO';
-                const isEnterprise = plan.name === 'Empresarial';
+            appData.shipments.forEach(shipment => {
+                let statusClass = '';
+                if (shipment.status === 'Entregado') {
+                    statusClass = 'badge-success';
+                } else if (shipment.status === 'En aduana') {
+                    statusClass = 'badge-warning';
+                } else {
+                    statusClass = 'badge-primary';
+                }
                 
-                pricingContainer.innerHTML += `
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0 ${isPro ? 'mb-xl-0' : ''}">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold ${isPro ? '' : 'text-muted'}">
-                                    ${isPro ? '<i class="bi bi-star-fill text-warning"></i>' : ''}
-                                    ${plan.name}
-                                </div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">${plan.price}</span>
-                                    <span class="text-muted">${plan.period}</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    ${plan.features.map(f => `
-                                        <li class="mb-2">
-                                            <i class="bi bi-check text-primary"></i>
-                                            ${f}
-                                        </li>
-                                    `).join('')}
-                                    ${plan.limitations.map(l => `
-                                        <li class="mb-2 text-muted">
-                                            <i class="bi bi-x"></i>
-                                            ${l}
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                                <div class="d-grid">
-                                    <a class="btn ${isPro ? 'btn-primary' : 'btn-outline-primary'}" href="#">
-                                        ${plan.button}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                shipmentsBody.innerHTML += `
+                    <tr>
+                        <td>${shipment.trackingNumber}</td>
+                        <td>${shipment.carrier}</td>
+                        <td>${shipment.origin}</td>
+                        <td>${shipment.destination}</td>
+                        <td><span class="badge ${statusClass}">${shipment.status}</span></td>
+                        <td>${shipment.estimatedDelivery}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info">Rastrear</button>
+                        </td>
+                    </tr>
                 `;
             });
+            
+            // Initialize charts
+            initCharts();
         }
+
+        // Load inventory content
+        function loadInventory() {
+            const inventoryBody = document.getElementById('inventory-body');
+            inventoryBody.innerHTML = '';
+            
+            appData.inventory.forEach(item => {
+                let statusClass = item.status === 'Disponible' ? 'badge-success' : 'badge-warning';
+                
+                inventoryBody.innerHTML += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.product}</td>
+                        <td>${item.sku}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.location}</td>
+                        <td>${item.account}</td>
+                        <td><span class="badge ${statusClass}">${item.status}</span></td>
+                        <td>$${item.value.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info">Detalles</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            // Initialize inventory charts
+            initInventoryCharts();
+        }
+
+        // Initialize dashboard charts
+        function initCharts() {
+            // Shipments Chart
+            const shipmentsCtx = document.getElementById('shipmentsChart');
+            if (shipmentsCtx) {
+                new Chart(shipmentsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        datasets: [{
+                            label: 'Envíos',
+                            data: [65, 59, 80, 81, 56, 55, 40, 72, 85, 91, 76, 89],
+                            backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                            borderColor: 'rgba(78, 115, 223, 1)',
+                            pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Inventory Chart
+            const inventoryCtx = document.getElementById('inventoryChart');
+            if (inventoryCtx) {
+                new Chart(inventoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['TechImport', 'DigitalPlus', 'ElectroWorld'],
+                        datasets: [{
+                            data: [55, 30, 15],
+                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
+                        }],
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        cutout: '80%',
+                    },
+                });
+            }
+        }
+
+        // Initialize inventory charts
+        function initInventoryCharts() {
+            // Account Inventory Chart
+            const accountInventoryCtx = document.getElementById('accountInventoryChart');
+            if (accountInventoryCtx) {
+                new Chart(accountInventoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['TechImport', 'DigitalPlus', 'ElectroWorld'],
+                        datasets: [{
+                            data: [45, 30, 25],
+                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
+                        }],
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                    },
+                });
+            }
+            
+            // Status Inventory Chart
+            const statusInventoryCtx = document.getElementById('statusInventoryChart');
+            if (statusInventoryCtx) {
+                new Chart(statusInventoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Disponible', 'Reservado'],
+                        datasets: [{
+                            data: [75, 25],
+                            backgroundColor: ['#1cc88a', '#f6c23e'],
+                            hoverBackgroundColor: ['#17a673', '#dda20a'],
+                            hoverBorderColor: 'rgba(234, 236, 244, 1)',
+                        }],
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        cutout: '80%',
+                    },
+                });
+            }
+        }
+
+        // Shipping form functions
+        function showShippingForm() {
+            document.getElementById('shipping-form-container').classList.remove('hidden');
+            // Reset form to first step
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.add('hidden');
+            });
+            document.getElementById('step1').classList.remove('hidden');
+            // Scroll to form
+            document.getElementById('shipping-form-container').scrollIntoView();
+        }
+
+        function hideShippingForm() {
+            document.getElementById('shipping-form-container').classList.add('hidden');
+        }
+
+        // Form step navigation
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('next-step')) {
+                const nextStep = e.target.getAttribute('data-next');
+                const currentStep = document.querySelector('.step:not(.hidden)');
+                
+                // Validate current step before proceeding
+                if (validateStep(currentStep.id)) {
+                    currentStep.classList.add('hidden');
+                    document.getElementById(nextStep).classList.remove('hidden');
+                    
+                    // If this is the review step, update the review content
+                    if (nextStep === 'step6') {
+                        updateReviewContent();
+                    }
+                    
+                    // Scroll to top of form
+                    document.getElementById('shipping-form-container').scrollIntoView();
+                }
+            }
+            
+            if (e.target.classList.contains('prev-step')) {
+                const prevStep = e.target.getAttribute('data-prev');
+                document.querySelector('.step:not(.hidden)').classList.add('hidden');
+                document.getElementById(prevStep).classList.remove('hidden');
+                
+                // Scroll to top of form
+                document.getElementById('shipping-form-container').scrollIntoView();
+            }
+        });
+
+        // Validate form step
+        function validateStep(stepId) {
+            const step = document.getElementById(stepId);
+            const inputs = step.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                alert('Por favor complete todos los campos requeridos.');
+            }
+            
+            return isValid;
+        }
+
+        // Update review content
+        function updateReviewContent() {
+            // Sender info
+            document.getElementById('review-sender').textContent = 
+                `${document.getElementById('sender-name').value} ${document.getElementById('sender-company').value ? `(${document.getElementById('sender-company').value})` : ''}`;
+            document.getElementById('review-sender-address').textContent = 
+                `${document.getElementById('sender-address').value}, ${document.getElementById('sender-zip').value}, ${document.getElementById('sender-country').options[document.getElementById('sender-country').selectedIndex].text}`;
+            document.getElementById('review-sender-contact').textContent = 
+                `${document.getElementById('sender-email').value} | ${document.getElementById('sender-phone').value}`;
+            
+            // Recipient info
+            document.getElementById('review-recipient').textContent = 
+                `${document.getElementById('recipient-name').value} ${document.getElementById('recipient-company').value ? `(${document.getElementById('recipient-company').value})` : ''}`;
+            document.getElementById('review-recipient-address').textContent = 
+                `${document.getElementById('recipient-address').value}, ${document.getElementById('recipient-zip').value}, ${document.getElementById('recipient-country').options[document.getElementById('recipient-country').selectedIndex].text}`;
+            document.getElementById('review-recipient-contact').textContent = 
+                `${document.getElementById('recipient-email').value || 'N/A'} | ${document.getElementById('recipient-phone').value}`;
+            
+            // Shipping info
+            document.getElementById('review-shipping-date').textContent = 
+                `${document.getElementById('shipping-date').value} (${document.getElementById('shipping-time').options[document.getElementById('shipping-time').selectedIndex].text})`;
+            document.getElementById('review-package-type').textContent = 
+                document.getElementById('package-type').options[document.getElementById('package-type').selectedIndex].text;
+            document.getElementById('review-shipping-service').textContent = 
+                document.getElementById('shipping-service').options[document.getElementById('shipping-service').selectedIndex].text;
+            
+            // Package info
+            document.getElementById('review-package-weight').textContent = 
+                document.getElementById('package-weight').value;
+            document.getElementById('review-package-dimensions').textContent = 
+                `${document.getElementById('package-length').value} x ${document.getElementById('package-width').value} x ${document.getElementById('package-height').value}`;
+            document.getElementById('review-package-value').textContent = 
+                document.getElementById('package-value').value;
+            
+            // Additional services
+            let additionalServices = [];
+            if (document.getElementById('signature-confirmation').checked) {
+                additionalServices.push('Confirmación de firma');
+            }
+            if (document.getElementById('delivery-confirmation').checked) {
+                additionalServices.push('Confirmación de entrega');
+            }
+            if (document.getElementById('temperature-control').checked) {
+                additionalServices.push('Control de temperatura');
+            }
+            if (document.getElementById('customs-help').checked) {
+                additionalServices.push('Asistencia con aduanas');
+            }
+            
+            const insurance = document.querySelector('input[name="insurance"]:checked').value;
+            if (insurance === 'basic') {
+                additionalServices.push('Seguro básico ($100)');
+            } else if (insurance === 'full') {
+                additionalServices.push('Seguro completo');
+            }
+            
+            document.getElementById('review-additional-services').textContent = 
+                additionalServices.join(', ') || 'Ninguno';
+            
+            document.getElementById('review-special-instructions').textContent = 
+                document.getElementById('special-instructions').value || 'Ninguna';
+        }
+
+        // Same as sender checkbox
+        document.getElementById('same-as-sender').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('recipient-name').value = document.getElementById('sender-name').value;
+                document.getElementById('recipient-company').value = document.getElementById('sender-company').value;
+                document.getElementById('recipient-email').value = document.getElementById('sender-email').value;
+                document.getElementById('recipient-phone').value = document.getElementById('sender-phone').value;
+                document.getElementById('recipient-country').value = document.getElementById('sender-country').value;
+                document.getElementById('recipient-zip').value = document.getElementById('sender-zip').value;
+                document.getElementById('recipient-address').value = document.getElementById('sender-address').value;
+            }
+        });
+
+        // Special packaging radio
+        document.querySelectorAll('input[name="special-packaging"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('packaging-type-container').style.display = 
+                    this.value === 'yes' ? 'block' : 'none';
+            });
+        });
+
+        // Tracking functionality
+        document.getElementById('track-button').addEventListener('click', function() {
+            const trackingNumber = document.getElementById('tracking-number').value.trim();
+            const carrier = document.getElementById('carrier-select').value;
+            
+            if (!trackingNumber) {
+                alert('Por favor ingrese un número de seguimiento.');
+                return;
+            }
+            
+            if (!carrier) {
+                alert('Por favor seleccione un transportista.');
+                return;
+            }
+            
+            // Simulate tracking lookup
+            const trackingResults = document.getElementById('tracking-results');
+            trackingResults.classList.remove('hidden');
+            
+            // Find shipment in our data
+            const shipment = appData.shipments.find(s => s.trackingNumber === trackingNumber);
+            if (shipment) {
+                document.getElementById('status-text').textContent = shipment.status;
+                document.getElementById('status-progress').style.width = `${shipment.progress}%`;
+                document.getElementById('origin-text').textContent = shipment.origin;
+                document.getElementById('destination-text').textContent = shipment.destination;
+                document.getElementById('eta-text').textContent = shipment.estimatedDelivery;
+                document.getElementById('last-update-text').textContent = shipment.lastUpdate;
+            } else {
+                // Default data if not found
+                document.getElementById('status-text').textContent = 'En tránsito';
+                document.getElementById('status-progress').style.width = '50%';
+                document.getElementById('origin-text').textContent = 'Miami, FL, USA';
+                document.getElementById('destination-text').textContent = 'Madrid, España';
+                document.getElementById('eta-text').textContent = '2023-12-15';
+                document.getElementById('last-update-text').textContent = '2023-12-10 14:30';
+            }
+        });
+
+        // Apply inventory filters
+        document.getElementById('apply-filters').addEventListener('click', function() {
+            const accountFilter = document.getElementById('filter-account').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const locationFilter = document.getElementById('filter-location').value;
+            
+            const filteredInventory = appData.inventory.filter(item => {
+                return (!accountFilter || item.account === accountFilter) &&
+                       (!statusFilter || item.status === statusFilter) &&
+                       (!locationFilter || item.location.startsWith(locationFilter));
+            });
+            
+            const inventoryBody = document.getElementById('inventory-body');
+            inventoryBody.innerHTML = '';
+            
+            filteredInventory.forEach(item => {
+                let statusClass = item.status === 'Disponible' ? 'badge-success' : 'badge-warning';
+                
+                inventoryBody.innerHTML += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.product}</td>
+                        <td>${item.sku}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.location}</td>
+                        <td>${item.account}</td>
+                        <td><span class="badge ${statusClass}">${item.status}</span></td>
+                        <td>$${item.value.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info">Detalles</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            // Update charts with filtered data
+            initInventoryCharts();
+        });
     </script>
 </body>
 </html>
