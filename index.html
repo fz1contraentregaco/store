@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso con Clave Privada</title>
+    <title>Acceso con Clave Nostr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/nostr-tools@1.0.0/lib/nostr.bundle.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -20,6 +21,11 @@
         .hidden {
             display: none;
         }
+        .npub {
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -27,264 +33,135 @@
     <div id="login-page">
         <div class="container">
             <div class="login-container">
-                <h2 class="text-center mb-4">Acceso con Clave Privada</h2>
+                <h2 class="text-center mb-4">Acceso con Clave Nostr</h2>
                 <form id="login-form">
                     <div class="mb-3">
-                        <label for="private-key" class="form-label">Clave Privada</label>
-                        <textarea class="form-control" id="private-key" rows="5" placeholder="Pega tu clave privada aquí" required></textarea>
+                        <label for="private-key" class="form-label">Clave Privada (nsec)</label>
+                        <textarea class="form-control" id="private-key" rows="5" placeholder="Pega tu clave privada nsec aquí" required></textarea>
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
                     </div>
                 </form>
                 <div class="text-center mt-3">
-                    <a href="#" id="register-link">Registrarse</a>
+                    <a href="#" id="register-link">Generar Nueva Clave Nostr</a>
                 </div>
                 <div id="login-error" class="alert alert-danger mt-3 hidden" role="alert"></div>
             </div>
         </div>
     </div>
 
-    <!-- Página de Registro (oculta inicialmente) -->
+    <!-- Página de Registro -->
     <div id="register-page" class="hidden">
         <div class="container">
             <div class="login-container">
-                <h2 class="text-center mb-4">Registro de Nueva Clave</h2>
+                <h2 class="text-center mb-4">Tu Nueva Clave Nostr</h2>
                 <div class="mb-3">
-                    <p>Tu nueva clave privada ha sido generada. Copia y guarda esta clave en un lugar seguro. Será tu única forma de acceder al sistema.</p>
-                    <textarea class="form-control" id="new-private-key" rows="5" readonly></textarea>
+                    <p class="fw-bold">Clave Pública (npub):</p>
+                    <div class="npub bg-light p-2 mb-3 rounded" id="npub-display"></div>
+                    
+                    <p class="fw-bold">Clave Privada (nsec):</p>
+                    <textarea class="form-control mb-3" id="new-private-key" rows="5" readonly></textarea>
                 </div>
                 <div class="alert alert-warning mb-3" role="alert">
-                    <strong>¡Importante!</strong> Si pierdes esta clave, no podrás recuperar el acceso a tu cuenta.
+                    <strong>¡Importante!</strong> Guarda esta clave privada (nsec) en un lugar seguro. Es tu única forma de acceder y no podrá recuperarse si la pierdes.
                 </div>
                 <div class="d-grid gap-2">
-                    <button id="copy-key-btn" class="btn btn-primary">Copiar Clave</button>
-                    <button id="go-to-login-btn" class="btn btn-secondary">Volver al Login</button>
+                    <button id="copy-key-btn" class="btn btn-primary">Copiar Clave Privada</button>
+                    <button id="use-key-btn" class="btn btn-success">Usar esta clave para ingresar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Página Principal (oculta inicialmente) -->
+    <!-- Página Principal -->
     <div id="main-page" class="hidden">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container px-5">
-                <a class="navbar-brand" href="#!">Contraentregaco FZ1</a>
+                <a class="navbar-brand" href="#!">Sitio Protegido con Nostr</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="#section1" data-section="section1">Sección 1</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#section2" data-section="section2">Sección 2</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#section3" data-section="section3">Sección 3</a></li>
+                    </ul>
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Facebook</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Whatsapp</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Telegram</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Wechat</a></li>
+                        <li class="nav-item">
+                            <span class="nav-link text-light npub" id="current-user-npub"></span>
+                        </li>
                         <li class="nav-item"><a class="nav-link" href="#" id="logout-link">Cerrar Sesión</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <header class="bg-dark py-5">
-            <div class="container px-5">
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center my-5">
-                            <h1 class="display-5 fw-bolder text-white mb-2">Present your business in a whole new way</h1>
-                            <p class="lead text-white-50 mb-4">Quickly design and customize responsive mobile-first sites with Bootstrap, the world's most popular front-end open source toolkit!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <section class="py-5">
-            <div class="container px-5 my-5">
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-8 col-xl-6">
-                        <div class="text-center">
-                            <h2 class="fw-bolder">Video Demonstration</h2>
-                            <p class="lead fw-normal text-muted mb-5">Watch how our product works</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/9No-FiEInLA" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-5 border-bottom" id="features">
-            <div class="container px-5 my-5">
-                <div class="row gx-5">
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-building"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="bg-light py-5 border-bottom">
-            <div class="container px-5 my-5">
-                <div class="text-center mb-5">
-                    <h2 class="fw-bolder">Pay as you grow</h2>
-                    <p class="lead mb-0">With our no hassle pricing plans</p>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold text-muted">Gratis</div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$0</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>1 users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-outline-primary" href="#!">Crear Cuenta</a></div>
+        <div class="container mt-5">
+            <!-- Sección 1 -->
+            <div id="section1" class="content-section">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bolder mb-4">Contenido Protegido - Sección 1</h2>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Información confidencial</h5>
+                                <p class="card-text">Este contenido solo es visible porque has iniciado sesión con tu clave Nostr.</p>
+                                <p class="card-text">Tu clave pública (npub): <span class="npub" id="section1-npub"></span></p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                    PRO
+                </div>
+            </div>
+
+            <!-- Sección 2 -->
+            <div id="section2" class="content-section hidden">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bolder mb-4">Contenido Protegido - Sección 2</h2>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Más información privada</h5>
+                                <p class="card-text">Esta es otra sección protegida que requiere autenticación Nostr.</p>
+                                <div class="alert alert-info">
+                                    La autenticación con Nostr garantiza que solo tú puedes acceder a este contenido.
                                 </div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$9</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>5 users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-primary" href="#!">Mejorar Cuenta a PRO</a></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-xl-4">
+                </div>
+            </div>
+
+            <!-- Sección 3 -->
+            <div id="section3" class="content-section hidden">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bolder mb-4">Contenido Protegido - Sección 3</h2>
                         <div class="card">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold text-muted">FZ</div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$49</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>Unlimited users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-outline-primary" href="#!">Mejorar Cuenta a FZ</a></div>
+                            <div class="card-body">
+                                <h5 class="card-title">Zona de administración</h5>
+                                <p class="card-text">Área restringida con acceso mediante clave privada Nostr.</p>
+                                <button class="btn btn-primary" id="check-nostr-button">Verificar Conexión Nostr</button>
+                                <div id="nostr-result" class="mt-3"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <footer class="py-5 bg-dark">
-            <div class="container px-5"><p class="m-0 text-center text-white">Tor:</p></div>
+        <footer class="py-5 bg-dark mt-5">
+            <div class="container px-5">
+                <p class="m-0 text-center text-white">Sistema de autenticación Nostr - Todos los derechos reservados</p>
+            </div>
         </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Simulación de base de datos usando localStorage
-        const userDB = {
-            keys: JSON.parse(localStorage.getItem('privateKeys')) || [],
-            
-            addKey: function(key) {
-                this.keys.push(key);
-                localStorage.setItem('privateKeys', JSON.stringify(this.keys));
-            },
-            
-            validateKey: function(key) {
-                return this.keys.includes(key);
-            },
-            
-            generateKey: function() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                let key = '';
-                for (let i = 0; i < 64; i++) {
-                    key += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return key;
-            }
-        };
+        // Variables globales
+        let currentUser = null;
 
         // Elementos del DOM
         const loginPage = document.getElementById('login-page');
@@ -296,84 +173,109 @@
         const registerLink = document.getElementById('register-link');
         const logoutLink = document.getElementById('logout-link');
         const newPrivateKey = document.getElementById('new-private-key');
+        const npubDisplay = document.getElementById('npub-display');
         const copyKeyBtn = document.getElementById('copy-key-btn');
-        const goToLoginBtn = document.getElementById('go-to-login-btn');
+        const useKeyBtn = document.getElementById('use-key-btn');
+        const currentUserNpub = document.getElementById('current-user-npub');
+        const section1Npub = document.getElementById('section1-npub');
+        const contentSections = document.querySelectorAll('.content-section');
+        const navLinks = document.querySelectorAll('[data-section]');
+        const checkNostrButton = document.getElementById('check-nostr-button');
+        const nostrResult = document.getElementById('nostr-result');
 
-        // Mostrar la página correcta al cargar
+        // Mostrar sección correcta al cargar
         function showCorrectPage() {
-            if (localStorage.getItem('loggedIn') === 'true') {
-                loginPage.classList.add('hidden');
-                registerPage.classList.add('hidden');
-                mainPage.classList.remove('hidden');
+            const savedUser = localStorage.getItem('nostrUser');
+            
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    showMainPage();
+                } catch (e) {
+                    console.error("Error parsing user data", e);
+                    showLoginPage();
+                }
             } else {
-                loginPage.classList.remove('hidden');
-                registerPage.classList.add('hidden');
-                mainPage.classList.add('hidden');
+                showLoginPage();
             }
         }
 
-        // Inicializar
-        showCorrectPage();
-
-        // Login form submission
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const key = privateKeyInput.value.trim();
-            
-            if (key === '') {
-                showError('Por favor ingresa tu clave privada');
-                return;
-            }
-            
-            if (userDB.validateKey(key)) {
-                // Login exitoso
-                localStorage.setItem('loggedIn', 'true');
-                localStorage.setItem('currentKey', key);
-                showCorrectPage();
-            } else {
-                showError('Clave privada incorrecta');
-            }
-        });
-
-        // Register link click
-        registerLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            const newKey = userDB.generateKey();
-            newPrivateKey.value = newKey;
-            userDB.addKey(newKey);
-            
-            loginPage.classList.add('hidden');
-            registerPage.classList.remove('hidden');
-            mainPage.classList.add('hidden');
-        });
-
-        // Copy key button
-        copyKeyBtn.addEventListener('click', function() {
-            newPrivateKey.select();
-            document.execCommand('copy');
-            copyKeyBtn.textContent = '¡Copiada!';
-            setTimeout(() => {
-                copyKeyBtn.textContent = 'Copiar Clave';
-            }, 2000);
-        });
-
-        // Volver al login desde registro
-        goToLoginBtn.addEventListener('click', function() {
+        // Mostrar página de login
+        function showLoginPage() {
             loginPage.classList.remove('hidden');
             registerPage.classList.add('hidden');
             mainPage.classList.add('hidden');
             privateKeyInput.value = '';
-        });
+        }
 
-        // Logout
-        if (logoutLink) {
-            logoutLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                localStorage.removeItem('loggedIn');
-                localStorage.removeItem('currentKey');
-                showCorrectPage();
-                privateKeyInput.value = '';
+        // Mostrar página de registro
+        function showRegisterPage() {
+            loginPage.classList.add('hidden');
+            registerPage.classList.remove('hidden');
+            mainPage.classList.add('hidden');
+            
+            // Generar nueva clave Nostr
+            const sk = nostr.generatePrivateKey();
+            const nsec = nostr.nip19.nsecEncode(sk);
+            const pk = nostr.getPublicKey(sk);
+            const npub = nostr.nip19.npubEncode(pk);
+            
+            newPrivateKey.value = nsec;
+            npubDisplay.textContent = npub;
+        }
+
+        // Mostrar página principal
+        function showMainPage() {
+            if (!currentUser) return showLoginPage();
+            
+            loginPage.classList.add('hidden');
+            registerPage.classList.add('hidden');
+            mainPage.classList.remove('hidden');
+            
+            // Mostrar npub del usuario
+            currentUserNpub.textContent = currentUser.npub;
+            section1Npub.textContent = currentUser.npub;
+            
+            // Mostrar primera sección por defecto
+            showSection('section1');
+        }
+
+        // Mostrar sección específica
+        function showSection(sectionId) {
+            contentSections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
             });
+        }
+
+        // Validar clave privada Nostr
+        function validateNostrKey(nsec) {
+            try {
+                const { type, data } = nostr.nip19.decode(nsec);
+                if (type !== 'nsec') return false;
+                
+                const pk = nostr.getPublicKey(data);
+                const npub = nostr.nip19.npubEncode(pk);
+                
+                return {
+                    sk: data,
+                    pk: pk,
+                    nsec: nsec,
+                    npub: npub
+                };
+            } catch (e) {
+                console.error("Error decoding nsec", e);
+                return false;
+            }
+        }
+
+        // Guardar usuario en localStorage
+        function saveUser(userData) {
+            currentUser = userData;
+            localStorage.setItem('nostrUser', JSON.stringify(userData));
         }
 
         // Mostrar mensaje de error
@@ -384,6 +286,106 @@
                 loginError.classList.add('hidden');
             }, 3000);
         }
+
+        // Event Listeners
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nsec = privateKeyInput.value.trim();
+            
+            if (!nsec) {
+                showError('Por favor ingresa tu clave privada (nsec)');
+                return;
+            }
+            
+            const userData = validateNostrKey(nsec);
+            if (userData) {
+                saveUser(userData);
+                showMainPage();
+            } else {
+                showError('Clave privada Nostr inválida');
+            }
+        });
+
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showRegisterPage();
+        });
+
+        copyKeyBtn.addEventListener('click', function() {
+            newPrivateKey.select();
+            document.execCommand('copy');
+            copyKeyBtn.textContent = '¡Copiada!';
+            setTimeout(() => {
+                copyKeyBtn.textContent = 'Copiar Clave Privada';
+            }, 2000);
+        });
+
+        useKeyBtn.addEventListener('click', function() {
+            const nsec = newPrivateKey.value.trim();
+            const userData = validateNostrKey(nsec);
+            
+            if (userData) {
+                saveUser(userData);
+                showMainPage();
+            } else {
+                showError('Error al generar la clave');
+            }
+        });
+
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('nostrUser');
+                currentUser = null;
+                showLoginPage();
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                showSection(sectionId);
+            });
+        });
+
+        if (checkNostrButton) {
+            checkNostrButton.addEventListener('click', function() {
+                if (!currentUser) return;
+                
+                try {
+                    // Crear un evento Nostr de prueba
+                    const event = {
+                        kind: 1,
+                        created_at: Math.floor(Date.now() / 1000),
+                        tags: [],
+                        content: "Verificación de autenticación Nostr",
+                        pubkey: currentUser.pk
+                    };
+                    
+                    // Firmar el evento
+                    const signedEvent = nostr.signEvent(event, currentUser.sk);
+                    
+                    nostrResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>¡Verificación exitosa!</strong>
+                            <p>Evento firmado correctamente con tu clave Nostr.</p>
+                            <small class="npub">Event ID: ${signedEvent.id}</small>
+                        </div>
+                    `;
+                } catch (e) {
+                    nostrResult.innerHTML = `
+                        <div class="alert alert-danger">
+                            <strong>Error en la verificación</strong>
+                            <p>${e.message}</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Inicializar
+        showCorrectPage();
     </script>
 </body>
 </html>
