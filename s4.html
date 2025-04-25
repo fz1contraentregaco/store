@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FZ WMS - Gestión Logística Integral</title>
-    <meta name="description" content="Plataforma profesional de gestión logística para socios - Almacenamiento, preparación de pedidos y envíos garantizados">
+    <title>FZ WMS - Gestión Logística Offline</title>
+    <meta name="description" content="Plataforma profesional de gestión logística para socios - Funcionalidad 100% offline">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -135,20 +135,12 @@
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
-            display: none;
+            display: flex;
+            align-items: center;
         }
 
-        .sync-status {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: var(--accent-color);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: none;
+        .offline-badge i {
+            margin-right: 0.5rem;
         }
 
         @media (max-width: 768px) {
@@ -277,46 +269,6 @@
             background-color: #f8f9fa;
         }
 
-        .badge-online {
-            background-color: var(--success-color);
-        }
-
-        .badge-offline {
-            background-color: var(--danger-color);
-        }
-
-        .connection-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .connection-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .dot-online {
-            background-color: var(--success-color);
-        }
-
-        .dot-offline {
-            background-color: var(--danger-color);
-        }
-
-        .dot-syncing {
-            background-color: var(--warning-color);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
         .nav-tabs .nav-link.active {
             font-weight: 600;
             border-bottom: 3px solid var(--primary-color);
@@ -373,10 +325,7 @@
             <div class="container">
                 <a class="navbar-brand" href="#">
                     <i class="bi bi-box-seam"></i> FZ WMS
-                    <span class="connection-status ms-2">
-                        <span id="connectionDot" class="connection-dot dot-online"></span>
-                        <small id="connectionStatusText">En línea</small>
-                    </span>
+                    <span class="badge bg-warning ms-2">OFFLINE</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -388,19 +337,12 @@
                         <li class="nav-item"><a class="nav-link" href="#pedidos"><i class="bi bi-clipboard-check me-1"></i> Pedidos</a></li>
                         <li class="nav-item"><a class="nav-link" href="#recogidas"><i class="bi bi-truck me-1"></i> Recogidas</a></li>
                         <li class="nav-item"><a class="nav-link" href="#comisiones"><i class="bi bi-cash-stack me-1"></i> Comisiones</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#reportes"><i class="bi bi-graph-up me-1"></i> Reportes</a></li>
                     </ul>
                     <div class="d-flex align-items-center">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle me-1"></i> <span id="userName">Usuario</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#configuracion"><i class="bi bi-gear me-2"></i>Configuración</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
-                            </ul>
-                        </div>
+                        <span class="text-white me-3">Bienvenido, <span id="userName">Usuario</span></span>
+                        <button class="btn btn-outline-light" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -410,103 +352,34 @@
         <main class="container my-5">
             <!-- Sección Dashboard -->
             <section id="dashboard" class="mb-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
-                    <div>
-                        <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshData()">
-                            <i class="bi bi-arrow-clockwise"></i> Actualizar
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="exportDashboardData()">
-                            <i class="bi bi-download"></i> Exportar
-                        </button>
-                    </div>
-                </div>
-                
+                <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
                 <div class="row g-4">
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-0">Inventario Almacenado</h5>
-                                    <h1 class="display-5 mb-0" id="inventoryCount">1,250</h1>
-                                    <small>Unidades</small>
-                                </div>
-                                <i class="bi bi-box-seam" style="font-size: 1.5rem;"></i>
-                            </div>
-                            <div class="mt-3">
-                                <small class="d-block"><span class="text-success">↑ 5.2%</span> vs mes anterior</small>
-                            </div>
+                            <h5 class="mb-0">Inventario Almacenado</h5>
+                            <h1 class="display-5 mb-0" id="inventoryCount">0</h1>
+                            <small>Unidades</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-0">Pedidos Activos</h5>
-                                    <h1 class="display-5 mb-0" id="activeOrders">85</h1>
-                                    <small>Este mes</small>
-                                </div>
-                                <i class="bi bi-clipboard-check" style="font-size: 1.5rem;"></i>
-                            </div>
-                            <div class="mt-3">
-                                <small class="d-block"><span class="text-success">↑ 12.7%</span> vs mes anterior</small>
-                            </div>
+                            <h5 class="mb-0">Pedidos Activos</h5>
+                            <h1 class="display-5 mb-0" id="activeOrders">0</h1>
+                            <small>Este mes</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-0">Tasa de Entrega</h5>
-                                    <h1 class="display-5 mb-0" id="deliveryRate">98.7%</h1>
-                                    <small>En tiempo</small>
-                                </div>
-                                <i class="bi bi-check-circle" style="font-size: 1.5rem;"></i>
-                            </div>
-                            <div class="mt-3">
-                                <small class="d-block"><span class="text-success">↑ 1.3%</span> vs mes anterior</small>
-                            </div>
+                            <h5 class="mb-0">Tasa de Entrega</h5>
+                            <h1 class="display-5 mb-0" id="deliveryRate">0%</h1>
+                            <small>En tiempo</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-0">Comisiones</h5>
-                                    <h1 class="display-5 mb-0" id="monthlyCommissions">$12,450</h1>
-                                    <small>Este mes</small>
-                                </div>
-                                <i class="bi bi-cash-stack" style="font-size: 1.5rem;"></i>
-                            </div>
-                            <div class="mt-3">
-                                <small class="d-block"><span class="text-success">↑ 8.5%</span> vs mes anterior</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mt-4 g-4">
-                    <div class="col-md-8">
-                        <div class="dashboard-card">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5>Actividad Reciente</h5>
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-secondary active">Hoy</button>
-                                    <button class="btn btn-outline-secondary">7 días</button>
-                                    <button class="btn btn-outline-secondary">30 días</button>
-                                </div>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="activityChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="dashboard-card">
-                            <h5 class="mb-3">Distribución de Pedidos</h5>
-                            <div class="chart-container">
-                                <canvas id="ordersChart"></canvas>
-                            </div>
+                            <h5 class="mb-0">Comisiones</h5>
+                            <h1 class="display-5 mb-0" id="monthlyCommissions">$0</h1>
+                            <small>Este mes</small>
                         </div>
                     </div>
                 </div>
@@ -530,9 +403,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="text-end mt-2">
-                                <a href="#pedidos" class="btn btn-sm btn-outline-primary">Ver todos</a>
-                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -553,9 +423,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="text-end mt-2">
-                                <a href="#inventario" class="btn btn-sm btn-outline-primary">Ver inventario</a>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -565,37 +432,9 @@
             <section id="inventario" class="mb-5">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="bi bi-boxes me-2"></i>Gestión de Inventario</h2>
-                    <div>
-                        <button class="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
-                            <i class="bi bi-plus-lg"></i> Agregar Producto
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="exportInventory()">
-                            <i class="bi bi-download"></i> Exportar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="search-container">
-                            <i class="bi bi-search"></i>
-                            <input type="text" class="form-control" id="inventorySearch" placeholder="Buscar productos...">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex justify-content-end">
-                            <div class="btn-group btn-group-sm me-2">
-                                <button class="btn btn-outline-secondary active">Todos</button>
-                                <button class="btn btn-outline-secondary">Bajo Stock</button>
-                                <button class="btn btn-outline-secondary">Crítico</button>
-                            </div>
-                            <select class="form-select form-select-sm" style="width: auto;">
-                                <option>Ordenar por: SKU</option>
-                                <option>Ordenar por: Nombre</option>
-                                <option>Ordenar por: Stock</option>
-                            </select>
-                        </div>
-                    </div>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                        <i class="bi bi-plus-lg"></i> Agregar Producto
+                    </button>
                 </div>
 
                 <div class="inventory-table">
@@ -617,24 +456,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center p-3">
-                        <div class="pagination-info">
-                            Mostrando <span id="inventoryStart">1</span> a <span id="inventoryEnd">10</span> de <span id="inventoryTotal">0</span> productos
-                        </div>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1">Anterior</a>
-                                </li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">Siguiente</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
                 </div>
             </section>
 
@@ -642,86 +463,34 @@
             <section id="pedidos" class="mb-5">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="bi bi-clipboard-check me-2"></i>Gestión de Pedidos</h2>
-                    <div>
-                        <button class="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createOrderModal">
-                            <i class="bi bi-plus-lg"></i> Nuevo Pedido
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="exportOrders()">
-                            <i class="bi bi-download"></i> Exportar
-                        </button>
-                    </div>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                        <i class="bi bi-plus-lg"></i> Nuevo Pedido
+                    </button>
                 </div>
 
-                <ul class="nav nav-tabs mb-4" id="ordersTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-orders" type="button">Todos</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-orders" type="button">Pendientes</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing-orders" type="button">En Proceso</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="shipped-tab" data-bs-toggle="tab" data-bs-target="#shipped-orders" type="button">Enviados</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered-orders" type="button">Entregados</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="ordersTabContent">
-                    <div class="tab-pane fade show active" id="all-orders" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Cliente</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
-                                        <th>Total</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="allOrdersTable">
-                                    <!-- Se llena con JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- Otras pestañas de pedidos -->
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center p-3">
-                    <div class="pagination-info">
-                        Mostrando <span id="ordersStart">1</span> a <span id="ordersEnd">10</span> de <span id="ordersTotal">0</span> pedidos
-                    </div>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Anterior</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Siguiente</a>
-                            </li>
-                        </ul>
-                    </nav>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
             <!-- Solicitud de Recogida -->
             <section id="recogidas" class="mb-5">
                 <div class="form-section">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2><i class="bi bi-truck me-2"></i>Solicitud de Recogida</h2>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="showPickupHistory()">
-                            <i class="bi bi-clock-history"></i> Historial
-                        </button>
-                    </div>
+                    <h2 class="mb-4"><i class="bi bi-truck me-2"></i>Solicitud de Recogida</h2>
                     <form id="pickupForm">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -751,13 +520,7 @@
                                     <option>Cajas Estándar</option>
                                     <option>Paletizado</option>
                                     <option>Contenedor</option>
-                                    <option>Bolsa</option>
-                                    <option>Otro</option>
                                 </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Instrucciones Especiales</label>
-                                <textarea class="form-control" rows="2" id="pickupInstructions"></textarea>
                             </div>
                             <div class="col-12">
                                 <div class="form-check">
@@ -778,12 +541,7 @@
             <!-- Estructura de Comisiones -->
             <section id="comisiones" class="mb-5">
                 <div class="form-section">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2><i class="bi bi-cash-stack me-2"></i>Estructura de Comisiones</h2>
-                        <button class="btn btn-sm btn-outline-primary" onclick="calculateCommissions()">
-                            <i class="bi bi-calculator"></i> Calcular Comisiones
-                        </button>
-                    </div>
+                    <h2 class="mb-4"><i class="bi bi-cash-stack me-2"></i>Estructura de Comisiones</h2>
                     <div class="fee-structure-table">
                         <table class="table">
                             <thead class="table-light">
@@ -822,155 +580,23 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <div class="mt-5">
-                        <h4 class="mb-4"><i class="bi bi-graph-up me-2"></i>Historial de Comisiones</h4>
-                        <div class="chart-container">
-                            <canvas id="commissionsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Reportes y Análisis -->
-            <section id="reportes" class="mb-5">
-                <div class="form-section">
-                    <h2 class="mb-4"><i class="bi bi-graph-up me-2"></i>Reportes y Análisis</h2>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header bg-white">
-                                    <h5 class="mb-0">Generar Reporte</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form id="reportForm">
-                                        <div class="mb-3">
-                                            <label class="form-label">Tipo de Reporte</label>
-                                            <select class="form-select" id="reportType" required>
-                                                <option value="">Seleccionar...</option>
-                                                <option>Inventario</option>
-                                                <option>Pedidos</option>
-                                                <option>Recogidas</option>
-                                                <option>Comisiones</option>
-                                                <option>Rendimiento</option>
-                                            </select>
-                                        </div>
-                                        <div class="row g-3 mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Fecha Inicial</label>
-                                                <input type="date" class="form-control" id="reportStartDate" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Fecha Final</label>
-                                                <input type="date" class="form-control" id="reportEndDate" required>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Formato</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatPDF" value="PDF" checked>
-                                                    <label class="form-check-label" for="formatPDF">PDF</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatExcel" value="Excel">
-                                                    <label class="form-check-label" for="formatExcel">Excel</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatCSV" value="CSV">
-                                                    <label class="form-check-label" for="formatCSV">CSV</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="bi bi-file-earmark-text"></i> Generar Reporte
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-header bg-white">
-                                    <h5 class="mb-0">Análisis de Rendimiento</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-container">
-                                        <canvas id="performanceChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header bg-white">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Reportes Guardados</h5>
-                                <button class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-funnel"></i> Filtrar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Tipo</th>
-                                            <th>Fecha</th>
-                                            <th>Tamaño</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="savedReportsTable">
-                                        <tr>
-                                            <td>Reporte_Inventario_Marzo_2024</td>
-                                            <td>Inventario</td>
-                                            <td>01/04/2024</td>
-                                            <td>1.2 MB</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="bi bi-download"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary me-1">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <!-- Más reportes -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
         </main>
 
         <!-- Footer -->
-        <footer class="bg-dark text-white py-4 mt-auto">
+        <footer class="bg-dark text-white py-4">
             <div class="container text-center">
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <h5>Soporte 24/7</h5>
+                    <div class="col-md-6 mb-3">
+                        <h5>Soporte</h5>
                         <p class="mb-1"><i class="bi bi-telephone"></i> +57 601 234 5678</p>
                         <p class="mb-0"><i class="bi bi-whatsapp"></i> +57 321 987 6543</p>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6">
                         <h5>Legal</h5>
                         <p class="mb-1"><a href="#" class="text-white">Términos de Servicio</a></p>
                         <p class="mb-0"><a href="#" class="text-white">Política de Privacidad</a></p>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Certificaciones</h5>
-                        <img src="https://via.placeholder.com/80x40.png/fff/000?text=ISO9001" alt="Certificación" class="me-2">
-                        <img src="https://via.placeholder.com/80x40.png/fff/000?text=GDP" alt="Certificación" class="me-2">
                     </div>
                 </div>
                 <hr class="my-4">
@@ -1026,31 +652,6 @@
                                 <label class="form-label">Descripción</label>
                                 <textarea class="form-control" rows="2" id="inventoryDescription"></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Peso (kg)</label>
-                                <input type="number" class="form-control" id="inventoryWeight" min="0.1" step="0.1">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Dimensiones (cm)</label>
-                                <div class="package-dimensions">
-                                    <input type="number" class="form-control" placeholder="Largo" id="inventoryLength">
-                                    <input type="number" class="form-control" placeholder="Ancho" id="inventoryWidth">
-                                    <input type="number" class="form-control" placeholder="Alto" id="inventoryHeight">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Proveedor</label>
-                                <input type="text" class="form-control" id="inventorySupplier">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Stock Mínimo</label>
-                                <input type="number" class="form-control" id="inventoryMinStock" min="1">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Imagen del Producto</label>
-                                <input type="file" class="form-control" id="inventoryImage" accept="image/*">
-                                <small class="text-muted">Formatos aceptados: JPG, PNG. Tamaño máximo: 2MB</small>
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -1075,12 +676,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Cliente</label>
-                                <select class="form-select" id="orderClient" required>
-                                    <option value="">Seleccionar...</option>
-                                    <option>Cliente 1</option>
-                                    <option>Cliente 2</option>
-                                    <option>Cliente 3</option>
-                                </select>
+                                <input type="text" class="form-control" id="orderClient" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Fecha de Entrega</label>
@@ -1092,43 +688,12 @@
                             </div>
                             <div class="col-12">
                                 <h6 class="mb-3">Productos</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm" id="orderProductsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Producto</th>
-                                                <th>Cantidad</th>
-                                                <th>Precio</th>
-                                                <th>Total</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Se llena dinámicamente -->
-                                        </tbody>
-                                    </table>
+                                <div id="orderProductsList">
+                                    <p class="text-muted">No hay productos agregados</p>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductToOrder()">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="showAddProductModal()">
                                     <i class="bi bi-plus"></i> Agregar Producto
                                 </button>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Método de Envío</label>
-                                <select class="form-select" id="orderShippingMethod" required>
-                                    <option value="">Seleccionar...</option>
-                                    <option>Estándar</option>
-                                    <option>Express</option>
-                                    <option>Prioritario</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Método de Pago</label>
-                                <select class="form-select" id="orderPaymentMethod" required>
-                                    <option value="">Seleccionar...</option>
-                                    <option>Transferencia</option>
-                                    <option>Tarjeta Crédito</option>
-                                    <option>Contraentrega</option>
-                                </select>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Notas</label>
@@ -1137,14 +702,9 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer justify-content-between">
-                    <div>
-                        <h5 class="mb-0">Total: <span id="orderTotalAmount">$0</span></h5>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="saveOrder()">Crear Pedido</button>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrder()">Crear Pedido</button>
                 </div>
             </div>
         </div>
@@ -1227,123 +787,86 @@
         </div>
     </div>
 
-    <!-- Indicadores de estado -->
+    <!-- Indicador offline -->
     <div class="offline-badge" id="offlineBadge">
-        <i class="bi bi-wifi-off"></i> Trabajando sin conexión
-    </div>
-    <div class="sync-status" id="syncStatus">
-        <i class="bi bi-arrow-repeat"></i> Sincronizando cambios...
+        <i class="bi bi-wifi-off"></i> Modo Offline
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        /// Configuración inicial
-const APP_NAME = 'FZ WMS';
-const APP_VERSION = '1.0.0';
-const APP_DATA_KEY = 'fzwms_app_data';
-const ACCESS_KEYS = ['FZWMS-2024-KEY1', 'FZWMS-2024-KEY2', 'FZWMS-2024-KEY3'];
-
-// Endpoints API (usar Formspree y Workers)
-const API_ENDPOINTS = {
-    inventory: 'https://formspree.io/f/xqkrvezw',
-    orders: 'https://formspree.io/f/xqkrvezw',
-    pickups: 'https://formspree.io/f/xqkrvezw',
-    reports: 'https://formspree.io/f/xqkrvezw',
-    sync: 'https://fzwms-worker.your-domain.workers.dev/sync'
-};
-
+        // Configuración inicial
+        const APP_NAME = "FZ WMS Offline";
+        const APP_VERSION = "1.0.0";
+        const APP_DATA_KEY = "fzwms_offline_data";
+        
+        // Credenciales válidas
+        const ACCESS_KEYS = ["FZWMS2024", "LOGISTICA2024", "ALMACEN123"];
+        
         // Datos iniciales de la aplicación
         let appData = {
-            inventory: [],
-            orders: [],
-            pickups: [],
+            inventory: [
+                { sku: "FZ-1001", name: "Smartphone X", category: "Electrónicos", quantity: 45, location: "A-12", value: 1200000 },
+                { sku: "FZ-1002", name: "Laptop Pro", category: "Electrónicos", quantity: 18, location: "A-15", value: 2500000 },
+                { sku: "FZ-2001", name: "Camiseta Básica", category: "Ropa", quantity: 120, location: "B-03", value: 45000 },
+                { sku: "FZ-2002", name: "Jeans Clásico", category: "Ropa", quantity: 35, location: "B-05", value: 120000 },
+                { sku: "FZ-3001", name: "Set de Cocina", category: "Hogar", quantity: 22, location: "C-08", value: 180000 }
+            ],
+            orders: [
+                { id: "ORD-1001", client: "Cliente A", date: "2024-03-15", status: "Entregado", total: 1250000, items: [
+                    { sku: "FZ-1001", name: "Smartphone X", quantity: 1, price: 1200000 }
+                ]},
+                { id: "ORD-1002", client: "Cliente B", date: "2024-03-18", status: "Enviado", total: 3700000, items: [
+                    { sku: "FZ-1002", name: "Laptop Pro", quantity: 1, price: 2500000 },
+                    { sku: "FZ-2002", name: "Jeans Clásico", quantity: 2, price: 120000 }
+                ]},
+                { id: "ORD-1003", client: "Cliente C", date: "2024-03-20", status: "En Proceso", total: 225000, items: [
+                    { sku: "FZ-2001", name: "Camiseta Básica", quantity: 5, price: 45000 }
+                ]}
+            ],
+            pickups: [
+                { id: "PICK-1001", date: "2024-03-10", time: "14:00", address: "Calle 123 #45-67", packages: 3, weight: 5.2, status: "Completado" },
+                { id: "PICK-1002", date: "2024-03-15", time: "10:30", address: "Avenida 5 #22-10", packages: 1, weight: 0.8, status: "Completado" }
+            ],
             settings: {
                 lowStockThreshold: 10,
-                criticalStockThreshold: 5,
-                commissionRates: {
-                    storage: 0.10,
-                    handling: 0.15,
-                    shipping: 0.12,
-                    special: 0.08
-                }
-            },
-            lastSync: null,
-            offlineChanges: []
+                criticalStockThreshold: 5
+            }
         };
 
         // Estado de la aplicación
         let appState = {
-            isOnline: navigator.onLine,
-            isSyncing: false,
-            currentUser: null
+            currentUser: null,
+            currentOrder: {
+                items: []
+            }
         };
 
         // Inicialización de la aplicación
         document.addEventListener('DOMContentLoaded', () => {
-            initApp();
+            loadAppData();
             setupEventListeners();
-            checkConnectionStatus();
             
-            // Escuchar cambios en la conexión
-            window.addEventListener('online', handleConnectionChange);
-            window.addEventListener('offline', handleConnectionChange);
+            // Mostrar badge offline permanentemente (para esta versión offline)
+            document.getElementById('offlineBadge').style.display = 'flex';
         });
 
-        // Función para inicializar la aplicación
-        function initApp() {
-            // Cargar datos guardados localmente
+        // Cargar datos guardados localmente
+        function loadAppData() {
             const savedData = localStorage.getItem(APP_DATA_KEY);
             if (savedData) {
                 appData = JSON.parse(savedData);
                 console.log("Datos cargados desde localStorage");
             } else {
-                // Datos de ejemplo para demostración
-                appData.inventory = [
-                    { sku: "FZ-1001", name: "Smartphone X", category: "Electrónicos", quantity: 45, location: "A-12", value: 1200000, weight: 0.2, minStock: 10 },
-                    { sku: "FZ-1002", name: "Laptop Pro", category: "Electrónicos", quantity: 18, location: "A-15", value: 2500000, weight: 1.5, minStock: 5 },
-                    { sku: "FZ-2001", name: "Camiseta Básica", category: "Ropa", quantity: 120, location: "B-03", value: 45000, weight: 0.3, minStock: 20 },
-                    { sku: "FZ-2002", name: "Jeans Clásico", category: "Ropa", quantity: 35, location: "B-05", value: 120000, weight: 0.5, minStock: 15 },
-                    { sku: "FZ-3001", name: "Set de Cocina", category: "Hogar", quantity: 22, location: "C-08", value: 180000, weight: 2.8, minStock: 8 },
-                    { sku: "FZ-4001", name: "Café Premium", category: "Alimentos", quantity: 65, location: "D-02", value: 35000, weight: 0.5, minStock: 30 },
-                    { sku: "FZ-5001", name: "Crema Hidratante", category: "Belleza", quantity: 8, location: "E-11", value: 55000, weight: 0.15, minStock: 10 },
-                    { sku: "FZ-6001", name: "Producto Variado", category: "Otros", quantity: 3, location: "F-09", value: 75000, weight: 0.7, minStock: 5 }
-                ];
-
-                appData.orders = [
-                    { id: "ORD-1001", client: "Cliente A", date: "2024-03-15", status: "Entregado", total: 1250000, items: [
-                        { sku: "FZ-1001", name: "Smartphone X", quantity: 1, price: 1200000 }
-                    ]},
-                    { id: "ORD-1002", client: "Cliente B", date: "2024-03-18", status: "Enviado", total: 3700000, items: [
-                        { sku: "FZ-1002", name: "Laptop Pro", quantity: 1, price: 2500000 },
-                        { sku: "FZ-2002", name: "Jeans Clásico", quantity: 2, price: 120000 }
-                    ]},
-                    { id: "ORD-1003", client: "Cliente C", date: "2024-03-20", status: "En Proceso", total: 225000, items: [
-                        { sku: "FZ-2001", name: "Camiseta Básica", quantity: 5, price: 45000 }
-                    ]},
-                    { id: "ORD-1004", client: "Cliente D", date: "2024-03-21", status: "Pendiente", total: 180000, items: [
-                        { sku: "FZ-3001", name: "Set de Cocina", quantity: 1, price: 180000 }
-                    ]}
-                ];
-
-                appData.pickups = [
-                    { id: "PICK-1001", date: "2024-03-10", time: "14:00", address: "Calle 123 #45-67", packages: 3, weight: 5.2, status: "Completado" },
-                    { id: "PICK-1002", date: "2024-03-15", time: "10:30", address: "Avenida 5 #22-10", packages: 1, weight: 0.8, status: "Completado" },
-                    { id: "PICK-1003", date: "2024-03-22", time: "16:00", address: "Carrera 7 #12-34", packages: 5, weight: 12.5, status: "Programado" }
-                ];
-
+                // Usar datos iniciales y guardarlos
                 saveAppData();
             }
+        }
 
-            // Verificar autenticación
-            const authToken = localStorage.getItem('authToken');
-            if (authToken && ACCESS_KEYS.includes(authToken)) {
-                document.getElementById('authSection').classList.add('d-none');
-                document.getElementById('mainContent').classList.remove('d-none');
-                appState.currentUser = authToken;
-                updateUI();
-            }
+        // Guardar datos localmente
+        function saveAppData() {
+            localStorage.setItem(APP_DATA_KEY, JSON.stringify(appData));
+            console.log("Datos guardados en localStorage");
         }
 
         // Configurar event listeners
@@ -1354,18 +877,9 @@ const API_ENDPOINTS = {
             // Formulario de recogida
             document.getElementById('pickupForm').addEventListener('submit', handlePickupForm);
             
-            // Formulario de reportes
-            document.getElementById('reportForm').addEventListener('submit', generateReport);
-            
-            // Búsqueda de inventario
-            document.getElementById('inventorySearch').addEventListener('input', filterInventory);
-            
             // Configurar fecha mínima para recogidas (hoy)
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('pickupDate').min = today;
-            
-            // Configurar gráficos
-            setupCharts();
         }
 
         // Sistema de Autenticación
@@ -1378,6 +892,7 @@ const API_ENDPOINTS = {
                 document.getElementById('authSection').classList.add('d-none');
                 document.getElementById('mainContent').classList.remove('d-none');
                 appState.currentUser = accessKey;
+                document.getElementById('userName').textContent = "Usuario " + accessKey.slice(-3);
                 updateUI();
                 showToast('success', 'Sesión iniciada correctamente');
             } else {
@@ -1389,77 +904,6 @@ const API_ENDPOINTS = {
         function logout() {
             localStorage.removeItem('authToken');
             window.location.reload();
-        }
-
-        // Manejo de conexión
-        function checkConnectionStatus() {
-            appState.isOnline = navigator.onLine;
-            updateConnectionUI();
-            
-            if (appState.isOnline) {
-                // Intentar sincronizar cambios pendientes
-                syncPendingChanges();
-            }
-        }
-
-        function handleConnectionChange() {
-            checkConnectionStatus();
-            
-            if (appState.isOnline) {
-                showToast('success', 'Conexión restablecida. Sincronizando datos...');
-            } else {
-                showToast('warning', 'Sin conexión. Trabajando en modo local.');
-            }
-        }
-
-        function updateConnectionUI() {
-            const connectionDot = document.getElementById('connectionDot');
-            const statusText = document.getElementById('connectionStatusText');
-            const offlineBadge = document.getElementById('offlineBadge');
-            
-            if (appState.isOnline) {
-                connectionDot.className = 'connection-dot dot-online';
-                statusText.textContent = 'En línea';
-                offlineBadge.style.display = 'none';
-            } else {
-                connectionDot.className = 'connection-dot dot-offline';
-                statusText.textContent = 'Sin conexión';
-                offlineBadge.style.display = 'block';
-            }
-            
-            if (appState.isSyncing) {
-                connectionDot.className = 'connection-dot dot-syncing';
-                statusText.textContent = 'Sincronizando...';
-            }
-        }
-
-        // Sincronización de datos
-        function syncPendingChanges() {
-            if (!appState.isOnline || appState.isSyncing || appData.offlineChanges.length === 0) return;
-            
-            appState.isSyncing = true;
-            updateConnectionUI();
-            document.getElementById('syncStatus').style.display = 'block';
-            
-            // Simular envío de cambios (en producción usaría fetch a los endpoints)
-            setTimeout(() => {
-                appData.offlineChanges = [];
-                appData.lastSync = new Date().toISOString();
-                saveAppData();
-                
-                appState.isSyncing = false;
-                updateConnectionUI();
-                document.getElementById('syncStatus').style.display = 'none';
-                
-                showToast('success', 'Datos sincronizados correctamente');
-                updateUI();
-            }, 2000);
-        }
-
-        // Guardar datos localmente
-        function saveAppData() {
-            localStorage.setItem(APP_DATA_KEY, JSON.stringify(appData));
-            console.log("Datos guardados en localStorage");
         }
 
         // Actualizar la interfaz de usuario
@@ -1478,23 +922,20 @@ const API_ENDPOINTS = {
             document.getElementById('inventoryCount').textContent = totalInventory.toLocaleString();
             
             // Contar pedidos activos
-            const activeOrders = appData.orders.filter(o => o.status !== 'Entregado' && o.status !== 'Cancelado').length;
+            const activeOrders = appData.orders.filter(o => o.status !== 'Entregado').length;
             document.getElementById('activeOrders').textContent = activeOrders;
             
-            // Calcular tasa de entrega (simulada)
+            // Calcular tasa de entrega
             const deliveredOrders = appData.orders.filter(o => o.status === 'Entregado').length;
             const totalOrders = appData.orders.length;
             const deliveryRate = totalOrders > 0 ? (deliveredOrders / totalOrders * 100).toFixed(1) : 0;
             document.getElementById('deliveryRate').textContent = `${deliveryRate}%`;
             
-            // Calcular comisiones (simuladas)
+            // Calcular comisiones (simplificado)
             const monthlyCommissions = appData.orders
                 .filter(o => o.date.startsWith('2024-03')) // Este mes
                 .reduce((sum, order) => sum + (order.total * 0.1), 0); // 10% de comisión
             document.getElementById('monthlyCommissions').textContent = `$${Math.round(monthlyCommissions).toLocaleString()}`;
-            
-            // Actualizar gráficos
-            updateCharts();
         }
 
         // Actualizar tabla de inventario
@@ -1507,12 +948,10 @@ const API_ENDPOINTS = {
                 
                 // Determinar clase de stock bajo/crítico
                 let rowClass = '';
-                if (item.minStock) {
-                    if (item.quantity <= appData.settings.criticalStockThreshold) {
-                        rowClass = 'inventory-critical';
-                    } else if (item.quantity <= appData.settings.lowStockThreshold) {
-                        rowClass = 'inventory-low';
-                    }
+                if (item.quantity <= appData.settings.criticalStockThreshold) {
+                    rowClass = 'inventory-critical';
+                } else if (item.quantity <= appData.settings.lowStockThreshold) {
+                    rowClass = 'inventory-low';
                 }
                 
                 row.className = rowClass;
@@ -1520,7 +959,7 @@ const API_ENDPOINTS = {
                     <td>${item.sku}</td>
                     <td>${item.name}</td>
                     <td>${item.category}</td>
-                    <td>${item.quantity} ${item.minStock ? `<small class="text-muted">/ ${item.minStock}</small>` : ''}</td>
+                    <td>${item.quantity}</td>
                     <td>${item.location}</td>
                     <td>$${item.value.toLocaleString()}</td>
                     <td>
@@ -1535,14 +974,11 @@ const API_ENDPOINTS = {
                 
                 tbody.appendChild(row);
             });
-            
-            // Actualizar información de paginación
-            document.getElementById('inventoryTotal').textContent = appData.inventory.length;
         }
 
         // Actualizar tabla de pedidos
         function updateOrdersTable() {
-            const tbody = document.getElementById('allOrdersTable');
+            const tbody = document.getElementById('ordersTable');
             tbody.innerHTML = '';
             
             appData.orders.forEach(order => {
@@ -1568,10 +1004,6 @@ const API_ENDPOINTS = {
                         statusClass = 'status-delivered';
                         statusText = 'Entregado';
                         break;
-                    case 'Cancelado':
-                        statusClass = 'status-cancelled';
-                        statusText = 'Cancelado';
-                        break;
                 }
                 
                 row.innerHTML = `
@@ -1589,9 +1021,6 @@ const API_ENDPOINTS = {
                 
                 tbody.appendChild(row);
             });
-            
-            // Actualizar información de paginación
-            document.getElementById('ordersTotal').textContent = appData.orders.length;
         }
 
         // Actualizar inventario crítico
@@ -1600,7 +1029,7 @@ const API_ENDPOINTS = {
             tbody.innerHTML = '';
             
             const criticalItems = appData.inventory.filter(item => 
-                item.minStock && item.quantity <= appData.settings.criticalStockThreshold
+                item.quantity <= appData.settings.criticalStockThreshold
             ).slice(0, 5); // Mostrar solo los 5 más críticos
             
             if (criticalItems.length === 0) {
@@ -1621,7 +1050,7 @@ const API_ENDPOINTS = {
                 row.innerHTML = `
                     <td>${item.sku}</td>
                     <td>${item.name}</td>
-                    <td>${item.quantity} <small class="text-muted">/ ${item.minStock}</small></td>
+                    <td>${item.quantity}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" onclick="reorderInventory('${item.sku}')">
                             <i class="bi bi-arrow-repeat"></i> Reabastecer
@@ -1664,10 +1093,6 @@ const API_ENDPOINTS = {
                         statusClass = 'status-delivered';
                         statusText = 'Entregado';
                         break;
-                    case 'Cancelado':
-                        statusClass = 'status-cancelled';
-                        statusText = 'Cancelado';
-                        break;
                 }
                 
                 row.innerHTML = `
@@ -1679,178 +1104,6 @@ const API_ENDPOINTS = {
                 
                 tbody.appendChild(row);
             });
-        }
-
-        // Configurar gráficos
-        function setupCharts() {
-            // Gráfico de actividad
-            const activityCtx = document.getElementById('activityChart').getContext('2d');
-            window.activityChart = new Chart(activityCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-                    datasets: [
-                        {
-                            label: 'Pedidos',
-                            data: [12, 19, 15, 20, 18, 25],
-                            borderColor: '#4299e1',
-                            backgroundColor: 'rgba(66, 153, 225, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Recogidas',
-                            data: [8, 12, 10, 15, 12, 18],
-                            borderColor: '#48bb78',
-                            backgroundColor: 'rgba(72, 187, 120, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico de distribución de pedidos
-            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-            window.ordersChart = new Chart(ordersCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pendientes', 'En Proceso', 'Enviados', 'Entregados', 'Cancelados'],
-                    datasets: [{
-                        data: [5, 8, 12, 25, 2],
-                        backgroundColor: [
-                            '#ecc94b',
-                            '#4299e1',
-                            '#667eea',
-                            '#48bb78',
-                            '#f56565'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico de comisiones
-            const commissionsCtx = document.getElementById('commissionsChart').getContext('2d');
-            window.commissionsChart = new Chart(commissionsCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Comisiones',
-                        data: [8500, 9200, 10200, 11500, 12450, 13500],
-                        backgroundColor: '#48bb78'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico de rendimiento
-            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-            window.performanceChart = new Chart(performanceCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['Inventario', 'Pedidos', 'Entregas', 'Comisiones', 'Clientes'],
-                    datasets: [
-                        {
-                            label: 'Este Mes',
-                            data: [85, 90, 95, 88, 92],
-                            backgroundColor: 'rgba(66, 153, 225, 0.2)',
-                            borderColor: '#4299e1',
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Mes Anterior',
-                            data: [78, 82, 88, 80, 85],
-                            backgroundColor: 'rgba(159, 122, 234, 0.2)',
-                            borderColor: '#9f7aea',
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: {
-                                display: true
-                            },
-                            suggestedMin: 50,
-                            suggestedMax: 100
-                        }
-                    }
-                }
-            });
-        }
-
-        // Actualizar gráficos con datos reales
-        function updateCharts() {
-            // Datos simulados para demostración
-            const deliveredOrders = appData.orders.filter(o => o.status === 'Entregado').length;
-            const processingOrders = appData.orders.filter(o => o.status === 'En Proceso').length;
-            const pendingOrders = appData.orders.filter(o => o.status === 'Pendiente').length;
-            const shippedOrders = appData.orders.filter(o => o.status === 'Enviado').length;
-            const cancelledOrders = appData.orders.filter(o => o.status === 'Cancelado').length;
-            
-            // Actualizar gráfico de distribución de pedidos
-            window.ordersChart.data.datasets[0].data = [
-                pendingOrders,
-                processingOrders,
-                shippedOrders,
-                deliveredOrders,
-                cancelledOrders
-            ];
-            window.ordersChart.update();
-            
-            // Actualizar gráfico de comisiones (simulado)
-            const monthlyCommissions = Math.round(appData.orders
-                .filter(o => o.date.startsWith('2024-03')) // Este mes
-                .reduce((sum, order) => sum + (order.total * 0.1), 0); // 10% de comisión
-            
-            window.commissionsChart.data.datasets[0].data = [8500, 9200, monthlyCommissions, 11500, 12450, 13500];
-            window.commissionsChart.update();
         }
 
         // Manejo de formulario de recogida
@@ -1865,84 +1118,16 @@ const API_ENDPOINTS = {
                 packages: parseInt(document.getElementById('pickupPackages').value),
                 weight: parseFloat(document.getElementById('pickupWeight').value),
                 packaging: document.getElementById('pickupPackaging').value,
-                instructions: document.getElementById('pickupInstructions').value,
                 status: 'Programado',
                 createdAt: new Date().toISOString()
             };
             
             // Agregar a los datos locales
             appData.pickups.push(pickupData);
+            saveAppData();
             
-            if (appState.isOnline) {
-                // Enviar a la API (simulado)
-                sendPickupRequest(pickupData)
-                    .then(() => {
-                        saveAppData();
-                        showToast('success', 'Recogida programada exitosamente');
-                        e.target.reset();
-                    })
-                    .catch(error => {
-                        console.error('Error al enviar recogida:', error);
-                        showToast('error', 'Error al programar recogida. Los datos se guardaron localmente.');
-                    });
-            } else {
-                // Guardar como cambio pendiente
-                appData.offlineChanges.push({
-                    type: 'pickup',
-                    data: pickupData,
-                    timestamp: new Date().toISOString()
-                });
-                saveAppData();
-                showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
-                e.target.reset();
-            }
-        }
-
-        // Función simulada para enviar recogida a la API
-        function sendPickupRequest(data) {
-            return new Promise((resolve, reject) => {
-                // Simular llamada a API con Formspree
-                setTimeout(() => {
-                    // En producción, usaría fetch a API_ENDPOINTS.pickups
-                    console.log('Recogida enviada a la API:', data);
-                    resolve();
-                }, 1000);
-            });
-        }
-
-        // Generar reporte
-        function generateReport(e) {
-            e.preventDefault();
-            
-            const reportType = document.getElementById('reportType').value;
-            const startDate = document.getElementById('reportStartDate').value;
-            const endDate = document.getElementById('reportEndDate').value;
-            const format = document.querySelector('input[name="reportFormat"]:checked').value;
-            
-            // Validar fechas
-            if (new Date(startDate) > new Date(endDate)) {
-                showToast('error', 'La fecha final debe ser posterior a la fecha inicial');
-                return;
-            }
-            
-            // Simular generación de reporte
-            showToast('success', `Generando reporte de ${reportType} en formato ${format}...`);
-            
-            // En producción, esto generaría y descargaría el reporte
-            setTimeout(() => {
-                showModal('success', `Reporte de ${reportType} generado exitosamente. Se ha enviado a su correo.`);
-            }, 2000);
-        }
-
-        // Filtrar inventario
-        function filterInventory() {
-            const searchTerm = document.getElementById('inventorySearch').value.toLowerCase();
-            const rows = document.getElementById('inventoryTableBody').querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            showToast('success', 'Recogida programada exitosamente');
+            e.target.reset();
         }
 
         // Funciones para inventario
@@ -1954,15 +1139,7 @@ const API_ENDPOINTS = {
                 quantity: parseInt(document.getElementById('inventoryQuantity').value),
                 location: document.getElementById('inventoryLocation').value,
                 value: parseFloat(document.getElementById('inventoryValue').value),
-                weight: parseFloat(document.getElementById('inventoryWeight').value) || 0,
-                minStock: parseInt(document.getElementById('inventoryMinStock').value) || 0,
-                description: document.getElementById('inventoryDescription').value,
-                supplier: document.getElementById('inventorySupplier').value,
-                dimensions: {
-                    length: parseFloat(document.getElementById('inventoryLength').value) || 0,
-                    width: parseFloat(document.getElementById('inventoryWidth').value) || 0,
-                    height: parseFloat(document.getElementById('inventoryHeight').value) || 0
-                }
+                description: document.getElementById('inventoryDescription').value
             };
             
             // Verificar si es edición o nuevo
@@ -1995,16 +1172,7 @@ const API_ENDPOINTS = {
             document.getElementById('inventoryQuantity').value = item.quantity;
             document.getElementById('inventoryLocation').value = item.location;
             document.getElementById('inventoryValue').value = item.value;
-            document.getElementById('inventoryWeight').value = item.weight || '';
-            document.getElementById('inventoryMinStock').value = item.minStock || '';
             document.getElementById('inventoryDescription').value = item.description || '';
-            document.getElementById('inventorySupplier').value = item.supplier || '';
-            
-            if (item.dimensions) {
-                document.getElementById('inventoryLength').value = item.dimensions.length || '';
-                document.getElementById('inventoryWidth').value = item.dimensions.width || '';
-                document.getElementById('inventoryHeight').value = item.dimensions.height || '';
-            }
             
             // Mostrar modal
             const modal = new bootstrap.Modal(document.getElementById('addInventoryModal'));
@@ -2038,10 +1206,8 @@ const API_ENDPOINTS = {
             const item = appData.inventory.find(i => i.sku === sku);
             if (!item) return;
             
-            // Simular reabastecimiento
-            const newQuantity = item.quantity + item.minStock * 2;
-            
-            // Actualizar cantidad
+            // Simular reabastecimiento (aumentar stock en 20 unidades)
+            const newQuantity = item.quantity + 20;
             item.quantity = newQuantity;
             saveAppData();
             updateUI();
@@ -2054,18 +1220,58 @@ const API_ENDPOINTS = {
             const order = appData.orders.find(o => o.id === orderId);
             if (!order) return;
             
-            // En una aplicación real, mostraría un modal con todos los detalles
-            showModal('success', `Detalles del pedido ${orderId}\nCliente: ${order.client}\nTotal: $${order.total.toLocaleString()}\nEstado: ${order.status}`);
+            // Mostrar detalles en un modal
+            let itemsList = order.items.map(item => 
+                `${item.name} (${item.sku}) - ${item.quantity} x $${item.price.toLocaleString()} = $${(item.quantity * item.price).toLocaleString()}`
+            ).join('\n');
+            
+            showModal('success', `Detalles del pedido ${orderId}\n\nCliente: ${order.client}\nFecha: ${formatDate(order.date)}\nEstado: ${order.status}\nTotal: $${order.total.toLocaleString()}\n\nProductos:\n${itemsList}`);
         }
 
-        function addProductToOrder() {
+        function showAddProductModal() {
             // En una aplicación real, mostraría un modal para seleccionar productos del inventario
-            showToast('info', 'Funcionalidad de agregar producto en desarrollo');
+            showToast('info', 'Seleccionar producto del inventario');
         }
 
         function saveOrder() {
-            // En una aplicación real, implementaría la lógica para guardar pedidos
-            showToast('info', 'Funcionalidad de guardar pedido en desarrollo');
+            const client = document.getElementById('orderClient').value;
+            const deliveryDate = document.getElementById('orderDeliveryDate').value;
+            const address = document.getElementById('orderAddress').value;
+            const notes = document.getElementById('orderNotes').value;
+            
+            if (!client || !deliveryDate || !address) {
+                showToast('error', 'Complete todos los campos requeridos');
+                return;
+            }
+            
+            if (appState.currentOrder.items.length === 0) {
+                showToast('error', 'Agregue al menos un producto al pedido');
+                return;
+            }
+            
+            const newOrder = {
+                id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+                client: client,
+                date: new Date().toISOString().split('T')[0],
+                deliveryDate: deliveryDate,
+                address: address,
+                status: 'Pendiente',
+                items: [...appState.currentOrder.items],
+                total: appState.currentOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                notes: notes
+            };
+            
+            // Agregar a los pedidos
+            appData.orders.push(newOrder);
+            saveAppData();
+            
+            // Limpiar orden actual
+            appState.currentOrder.items = [];
+            
+            // Cerrar modal y actualizar UI
+            bootstrap.Modal.getInstance(document.getElementById('createOrderModal')).hide();
+            updateUI();
+            showToast('success', `Pedido ${newOrder.id} creado exitosamente`);
         }
 
         // Funciones de utilidad
@@ -2090,58 +1296,6 @@ const API_ENDPOINTS = {
             messageEl.textContent = message;
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
-        }
-
-        function refreshData() {
-            // Simular recarga de datos
-            document.body.classList.add('cursor-wait');
-            
-            setTimeout(() => {
-                document.body.classList.remove('cursor-wait');
-                updateUI();
-                showToast('success', 'Datos actualizados correctamente');
-            }, 1000);
-        }
-
-        function exportDashboardData() {
-            // Simular exportación
-            showToast('success', 'Exportando datos del dashboard...');
-            
-            setTimeout(() => {
-                showModal('success', 'Datos exportados correctamente. Se ha descargado el archivo.');
-            }, 1500);
-        }
-
-        function exportInventory() {
-            // Simular exportación
-            showToast('success', 'Exportando inventario...');
-            
-            setTimeout(() => {
-                showModal('success', 'Inventario exportado correctamente. Se ha descargado el archivo CSV.');
-            }, 1500);
-        }
-
-        function exportOrders() {
-            // Simular exportación
-            showToast('success', 'Exportando pedidos...');
-            
-            setTimeout(() => {
-                showModal('success', 'Pedidos exportados correctamente. Se ha descargado el archivo Excel.');
-            }, 1500);
-        }
-
-        function showPickupHistory() {
-            // Simular mostrar historial
-            showModal('success', 'Historial de recogidas:\n\n' + 
-                appData.pickups.map(p => `${p.id} - ${p.date} ${p.time} - ${p.status}`).join('\n'));
-        }
-
-        function calculateCommissions() {
-            // Simular cálculo de comisiones
-            showModal('success', 'Comisiones calculadas:\n\n' +
-                `Total comisiones este mes: $${Math.round(appData.orders
-                    .filter(o => o.date.startsWith('2024-03')) // Este mes
-                    .reduce((sum, order) => sum + (order.total * 0.1), 0)).toLocaleString()}`);
         }
     </script>
 </body>
