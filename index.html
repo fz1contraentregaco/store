@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Nostr</title>
+    <title>Acceso Privado Nostr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/nostr-tools@1.0.0/lib/nostr.bundle.js"></script>
     <style>
@@ -26,44 +26,35 @@
             font-family: monospace;
             font-size: 0.9em;
         }
+        .alert-fixed {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 300px;
+        }
     </style>
 </head>
 <body>
+    <!-- Alertas flotantes -->
+    <div id="alert-container" class="alert-fixed"></div>
+
     <!-- Página de Login -->
     <div id="login-page">
         <div class="container">
             <div class="login-container">
-                <h2 class="text-center mb-4">Acceso con Clave Nostr</h2>
+                <h2 class="text-center mb-4">Acceso Privado</h2>
+                <p class="text-center text-muted mb-4">Solo para usuarios autorizados</p>
                 <form id="login-form">
                     <div class="mb-3">
                         <label for="private-key" class="form-label">Clave Privada (nsec)</label>
                         <textarea class="form-control nsec" id="private-key" rows="5" placeholder="Pega tu clave nsec aquí" required></textarea>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                        <button type="submit" class="btn btn-primary">Verificar Acceso</button>
                     </div>
                 </form>
-                <div class="text-center mt-3">
-                    <a href="#" id="register-link">Generar nueva clave</a>
-                </div>
                 <div id="login-error" class="alert alert-danger mt-3 hidden"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Página de Registro -->
-    <div id="register-page" class="hidden">
-        <div class="container">
-            <div class="login-container">
-                <h2 class="text-center mb-4">Tu Clave Privada Nostr</h2>
-                <div class="alert alert-warning mb-3">
-                    <strong>¡GUARDA ESTA CLAVE!</strong> Es la única forma de acceder y no podrá recuperarse.
-                </div>
-                <textarea class="form-control nsec mb-3" id="new-private-key" rows="5" readonly></textarea>
-                <div class="d-grid gap-2">
-                    <button id="copy-key-btn" class="btn btn-primary">Copiar Clave</button>
-                    <button id="back-to-login-btn" class="btn btn-secondary">Volver al Login</button>
-                </div>
             </div>
         </div>
     </div>
@@ -72,27 +63,44 @@
     <div id="main-page" class="hidden">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="#!">Contenido Protegido</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="#" id="logout-link">Cerrar Sesión</a></li>
-                    </ul>
+                <a class="navbar-brand" href="#!">Contenido Exclusivo</a>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="#" id="logout-link">Cerrar Sesión</a>
                 </div>
             </div>
         </nav>
 
         <div class="container mt-5">
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-md-10">
                     <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Bienvenido usuario autorizado</h3>
+                        </div>
                         <div class="card-body">
-                            <h3 class="card-title">Bienvenido</h3>
-                            <p class="card-text">Has accedido con éxito usando tu clave Nostr.</p>
-                            <button id="show-key-btn" class="btn btn-info">Mostrar mi clave pública</button>
-                            <div id="npub-display" class="mt-3 hidden"></div>
+                            <h4 class="mb-4">Información confidencial</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Documento 1</h5>
+                                            <p class="card-text">Contenido exclusivo para miembros autorizados con acceso Nostr.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Documento 2</h5>
+                                            <p class="card-text">Información clasificada disponible solo para tu clave pública.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button id="show-npub" class="btn btn-outline-secondary">Mostrar mi identidad Nostr</button>
+                                <div id="npub-display" class="mt-3 nsec hidden"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -102,138 +110,151 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Base de datos de claves autorizadas (en formato nsec)
+        const authorizedKeys = {
+            "users": [
+                {
+                    "name": "Usuario VIP 1",
+                    "nsec": "nsec1vl029mgpspedva04g90vltkh6fvh240zqtv9k0t9af8935ke9laqsnlfe5",
+                    "npub": "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg",
+                    "access": "full"
+                },
+                {
+                    "name": "Usuario Premium",
+                    "nsec": "nsec1j4c6y8gt9e3e0k4na2x5k6d9f7g2v3j5h7k8m9n0s1w2e3r4t5y6u7i8o9",
+                    "npub": "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95g8",
+                    "access": "premium"
+                }
+            ]
+        };
+
         // Elementos del DOM
         const loginPage = document.getElementById('login-page');
-        const registerPage = document.getElementById('register-page');
         const mainPage = document.getElementById('main-page');
         const loginForm = document.getElementById('login-form');
         const privateKeyInput = document.getElementById('private-key');
         const loginError = document.getElementById('login-error');
-        const registerLink = document.getElementById('register-link');
-        const newPrivateKey = document.getElementById('new-private-key');
-        const copyKeyBtn = document.getElementById('copy-key-btn');
-        const backToLoginBtn = document.getElementById('back-to-login-btn');
         const logoutLink = document.getElementById('logout-link');
-        const showKeyBtn = document.getElementById('show-key-btn');
+        const showNpubBtn = document.getElementById('show-npub');
         const npubDisplay = document.getElementById('npub-display');
+        const alertContainer = document.getElementById('alert-container');
 
-        // Datos del usuario
+        // Usuario actual
         let currentUser = null;
 
-        // Mostrar página correcta al cargar
-        function init() {
-            const savedUser = localStorage.getItem('nostrUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showMainPage();
-            } else {
-                showLoginPage();
+        // Mostrar alerta flotante
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Validar clave Nostr
+        function validateNostrKey(nsec) {
+            try {
+                // Decodificar la clave nsec
+                const { type, data } = nostr.nip19.decode(nsec);
+                if (type !== 'nsec') return false;
+                
+                // Obtener la clave pública
+                const pk = nostr.getPublicKey(data);
+                const npub = nostr.nip19.npubEncode(pk);
+                
+                // Verificar si está en la lista de autorizados
+                const authorizedUser = authorizedKeys.users.find(user => user.nsec === nsec);
+                
+                if (!authorizedUser) return false;
+                
+                return {
+                    ...authorizedUser,
+                    sk: data,
+                    pk: pk
+                };
+            } catch (e) {
+                console.error("Error validando clave:", e);
+                return false;
             }
         }
 
-        // Mostrar login
+        // Mostrar página de login
         function showLoginPage() {
             loginPage.classList.remove('hidden');
-            registerPage.classList.add('hidden');
             mainPage.classList.add('hidden');
             privateKeyInput.value = '';
-        }
-
-        // Mostrar registro
-        function showRegisterPage() {
-            loginPage.classList.add('hidden');
-            registerPage.classList.remove('hidden');
-            mainPage.classList.add('hidden');
-            
-            // Generar nueva clave Nostr
-            const sk = nostr.generatePrivateKey();
-            const nsec = nostr.nip19.nsecEncode(sk);
-            newPrivateKey.value = nsec;
         }
 
         // Mostrar contenido principal
         function showMainPage() {
             loginPage.classList.add('hidden');
-            registerPage.classList.add('hidden');
             mainPage.classList.remove('hidden');
+            showAlert(`Bienvenido ${currentUser.name}`, 'success');
         }
 
-        // Validar clave Nostr
-        function validateNsec(nsec) {
-            try {
-                const { type, data } = nostr.nip19.decode(nsec);
-                if (type !== 'nsec') return false;
-                
-                const pk = nostr.getPublicKey(data);
-                return {
-                    sk: data,
-                    nsec: nsec,
-                    npub: nostr.nip19.npubEncode(pk)
-                };
-            } catch (e) {
-                return false;
-            }
-        }
-
-        // Event listeners
+        // Manejar login
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const nsec = privateKeyInput.value.trim();
             
             if (!nsec) {
-                showError('Ingresa tu clave nsec');
+                loginError.textContent = 'Por favor ingresa tu clave privada';
+                loginError.classList.remove('hidden');
                 return;
             }
             
-            const user = validateNsec(nsec);
+            const user = validateNostrKey(nsec);
             if (user) {
                 currentUser = user;
-                localStorage.setItem('nostrUser', JSON.stringify(user));
+                localStorage.setItem('currentNostrUser', JSON.stringify(user));
                 showMainPage();
             } else {
-                showError('Clave nsec inválida');
+                loginError.textContent = 'Clave no autorizada o inválida';
+                loginError.classList.remove('hidden');
+                showAlert('Acceso denegado: clave no autorizada', 'danger');
             }
         });
 
-        registerLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showRegisterPage();
-        });
-
-        copyKeyBtn.addEventListener('click', () => {
-            newPrivateKey.select();
-            document.execCommand('copy');
-            copyKeyBtn.textContent = '¡Copiada!';
-            setTimeout(() => copyKeyBtn.textContent = 'Copiar Clave', 2000);
-        });
-
-        backToLoginBtn.addEventListener('click', () => {
-            showLoginPage();
-        });
-
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('nostrUser');
-            currentUser = null;
-            showLoginPage();
-        });
-
-        showKeyBtn.addEventListener('click', () => {
+        // Mostrar npub
+        showNpubBtn.addEventListener('click', () => {
             if (currentUser) {
-                npubDisplay.textContent = `Tu clave pública: ${currentUser.npub}`;
+                npubDisplay.textContent = `Tu identidad Nostr: ${currentUser.npub}`;
                 npubDisplay.classList.remove('hidden');
             }
         });
 
-        // Mostrar error
-        function showError(msg) {
-            loginError.textContent = msg;
-            loginError.classList.remove('hidden');
-            setTimeout(() => loginError.classList.add('hidden'), 3000);
-        }
+        // Logout
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('currentNostrUser');
+            currentUser = null;
+            showLoginPage();
+            showAlert('Sesión cerrada correctamente', 'info');
+        });
 
         // Inicializar
-        init();
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('currentNostrUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    // Verificar que el usuario guardado sigue siendo válido
+                    if (authorizedKeys.users.some(u => u.nsec === currentUser.nsec)) {
+                        showMainPage();
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Error cargando sesión:", e);
+                }
+            }
+            showLoginPage();
+        });
     </script>
 </body>
 </html>
