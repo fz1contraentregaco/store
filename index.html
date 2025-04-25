@@ -103,37 +103,37 @@
             max-width: 400px;
             margin: 100px auto;
             padding: 20px;
-            border-radius: 8px;
             background-color: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        #loginError {
-            display: none;
+        .carousel-item img {
+            height: 200px;
+            object-fit: contain;
+        }
+        .carousel-control-prev, .carousel-control-next {
+            background-color: rgba(0,0,0,0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
         }
     </style>
 </head>
 <body>
-    <!-- Página de Login -->
-    <div id="loginPage" class="container">
-        <div class="login-container">
-            <div class="text-center mb-4">
-                <h2>Acceso a FZ2</h2>
-                <p class="text-muted">Ingrese la clave de acceso</p>
-            </div>
-            <div id="loginError" class="alert alert-danger" role="alert">
-                Clave incorrecta. Intente nuevamente.
-            </div>
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label for="accessKey" class="form-label">Clave de acceso</label>
-                    <input type="password" class="form-control" id="accessKey" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-            </form>
+    <!-- Login Section (visible by default) -->
+    <div id="loginSection" class="login-container">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        <div class="mb-3">
+            <label for="accessKey" class="form-label">Clave de Acceso</label>
+            <input type="password" class="form-control" id="accessKey" placeholder="Ingresa la clave">
         </div>
+        <button onclick="checkAccessKey()" class="btn btn-dark w-100">Acceder</button>
+        <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
     </div>
 
-    <!-- Contenido principal (oculto hasta autenticación) -->
+    <!-- Main Content (hidden until login) -->
     <div id="mainContent" style="display: none;">
         <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
             <div class="container">
@@ -328,16 +328,20 @@
         const FORMSPREE_ENDPOINT = "https://formspree.io/f/xyzererb";
         const CLOUDFLARE_WORKER = "https://fz1.fz1-27c.workers.dev/";
         const DELIVERY_FEE = 5000;
-        const ACCESS_KEY = "FZ2clave2023"; // Clave de acceso almacenada internamente
+        const ACCESS_KEY = "FZ2024"; // Clave de acceso almacenada internamente
 
-        // Datos de productos
+        // Datos de productos con múltiples imágenes
         const products = [
             {
                 id: 1,
-                name: "1",
+                name: "Producto Premium",
                 price: 120000,
                 inventory: 15,
-                image: "1/1.jpg",
+                images: [
+                    "1/1.jpg",
+                    "1/1.1.jpg",
+                    "1/1.2.jpg"
+                ],
                 description: "Producto de alta calidad con garantía de 1 año.",
                 onSale: true
             },
@@ -346,7 +350,10 @@
                 name: "Producto Estándar",
                 price: 80000,
                 inventory: 30,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/FF00FF/FFFFFF?text=Producto+2",
+                    "https://via.placeholder.com/300/FFFF00/FFFFFF?text=Producto+2"
+                ],
                 description: "Producto confiable para uso diario.",
                 onSale: false
             },
@@ -355,7 +362,9 @@
                 name: "Producto Económico",
                 price: 50000,
                 inventory: 50,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/00FFFF/FFFFFF?text=Producto+3"
+                ],
                 description: "Solución económica sin perder calidad.",
                 onSale: true
             },
@@ -364,7 +373,10 @@
                 name: "Producto Deluxe",
                 price: 150000,
                 inventory: 10,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/FFA500/FFFFFF?text=Producto+4",
+                    "https://via.placeholder.com/300/800080/FFFFFF?text=Producto+4"
+                ],
                 description: "Edición especial con características exclusivas.",
                 onSale: false
             }
@@ -379,48 +391,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthentication();
             
-            // Configurar el formulario de login
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const enteredKey = document.getElementById('accessKey').value;
-                
-                if (enteredKey === ACCESS_KEY) {
-                    isAuthenticated = true;
-                    localStorage.setItem('fz2_authenticated', 'true');
-                    showMainContent();
-                } else {
-                    document.getElementById('loginError').style.display = 'block';
-                }
-            });
-            
-            // Si está autenticado, mostrar contenido principal
-            if (isAuthenticated) {
-                showMainContent();
-            }
-        });
-
-        // Verificar si el usuario está autenticado
-        function checkAuthentication() {
-            const authStatus = localStorage.getItem('fz2_authenticated');
-            if (authStatus === 'true') {
-                isAuthenticated = true;
-            } else {
-                // Si no está autenticado y no está en la página de login, redirigir
-                if (!window.location.href.includes('login.html') && !window.location.href.endsWith('/')) {
-                    window.location.href = 'index.html';
-                }
-            }
-        }
-
-        // Mostrar contenido principal después de autenticación
-        function showMainContent() {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            
-            renderProducts();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-            
+            // Manejar cambios en el método de entrega
             document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.getElementById('addressField').style.display = 
@@ -428,6 +399,45 @@
                     updateOrderSummary();
                 });
             });
+        });
+
+        // Verificar si el usuario está autenticado
+        function checkAuthentication() {
+            const savedKey = localStorage.getItem('accessKey');
+            if (savedKey === ACCESS_KEY) {
+                isAuthenticated = true;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                initializeApp();
+            } else {
+                isAuthenticated = false;
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+                
+                // Redirigir a login si intentan acceder a otra página
+                if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
+                    window.location.href = '/index.html';
+                }
+            }
+        }
+
+        // Verificar clave de acceso
+        function checkAccessKey() {
+            const enteredKey = document.getElementById('accessKey').value;
+            if (enteredKey === ACCESS_KEY) {
+                localStorage.setItem('accessKey', ACCESS_KEY);
+                checkAuthentication();
+            } else {
+                document.getElementById('loginError').textContent = 'Clave incorrecta. Intenta de nuevo.';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Inicializar la aplicación después del login
+        function initializeApp() {
+            renderProducts();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
         }
 
         // Actualizar fecha y hora
@@ -447,14 +457,34 @@
                 new Date().toLocaleString('es-CO', options);
         }
 
-        // Renderizar productos
+        // Renderizar productos con carrusel de imágenes
         function renderProducts(productsToShow = products) {
             const container = document.getElementById('productsContainer');
             container.innerHTML = productsToShow.map(product => `
                 <div class="col-md-4 col-lg-3">
                     <div class="card product-card h-100">
                         ${product.onSale ? '<span class="badge bg-danger badge-sale">SALE</span>' : ''}
-                        <img src="${product.image}" class="card-img-top p-3" alt="${product.name}">
+                        
+                        <div id="productCarousel-${product.id}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                ${product.images.map((img, index) => `
+                                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                        <img src="${img}" class="d-block w-100 p-3" alt="${product.name}">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${product.images.length > 1 ? `
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel-${product.id}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel-${product.id}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                        
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text text-muted small">${product.description}</p>
@@ -479,7 +509,7 @@
         // Funciones del carrito
         function addToCart(productId) {
             if (!isAuthenticated) {
-                alert('Por favor inicie sesión primero');
+                alert('Por favor inicia sesión primero');
                 return;
             }
             
@@ -493,7 +523,10 @@
         }
 
         function adjustQuantity(productId, change) {
-            if (!isAuthenticated) return;
+            if (!isAuthenticated) {
+                alert('Por favor inicia sesión primero');
+                return;
+            }
             
             const product = products.find(p => p.id === productId);
             if (!product) return;
@@ -521,7 +554,7 @@
         // Mostrar modal de pedido
         function showOrderModal() {
             if (!isAuthenticated) {
-                alert('Por favor inicie sesión primero');
+                alert('Por favor inicia sesión primero');
                 return;
             }
             
@@ -600,11 +633,6 @@
 
         // Procesar pago
         async function processPayment(paymentMethod) {
-            if (!isAuthenticated) {
-                alert('Por favor inicie sesión primero');
-                return;
-            }
-            
             const form = document.getElementById('customerForm');
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
