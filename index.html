@@ -812,13 +812,8 @@
                 bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
             }, 5000);
         }
-    </script>
-</body>
-</html>`;
-                }
-            }
-            
-            // Si estamos en otra página y no está autenticado, redirigir a login
+        
+        // Si estamos en otra página y no está autenticado, redirigir a login
             if (!window.location.pathname.endsWith('index.html') {
                 if (!sessionData || !sessionData.authenticated || new Date().getTime() >= sessionData.expiry) {
                     window.location.href = "index.html";
