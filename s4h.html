@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FZ WMS - Gestión Logística Híbrida</title>
+    <meta name="description" content="Plataforma profesional de gestión logística para socios - Funcionalidad offline con envío a Formspree y Cloudflare Workers">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2a4365;
+            --secondary-color: #2b6cb0;
+            --accent-color: #4299e1;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f7fafc;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .wms-navbar {
+            background: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        .commission-badge {
+            background: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .inventory-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--accent-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            border: 3px solid white;
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .package-dimensions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            height: 100%;
+        }
+
+        .offline-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--danger-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 50px auto;
+                padding: 1.5rem;
+            }
+            
+            .dashboard-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            display: none;
+        }
+
+        .storage-calculator {
+            background: #fff;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .fee-structure-table td {
+            vertical-align: middle;
+        }
+
+        .product-image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .inventory-low {
+            background-color: #fffaf0;
+        }
+
+        .inventory-critical {
+            background-color: #fff5f5;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 50rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #feebc8;
+            color: #9c4221;
+        }
+
+        .status-processing {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status-shipped {
+            background-color: #c6f6d5;
+            color: #276749;
+        }
+
+        .status-delivered {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .status-cancelled {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .data-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+        }
+
+        .inventory-actions {
+            margin-bottom: 1rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #6b7280;
+        }
+
+        .search-container input {
+            padding-left: 35px;
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .clickable-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .nav-tabs .nav-link {
+            color: #4a5568;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .cursor-progress {
+            cursor: progress;
+        }
+
+        .cursor-wait {
+            cursor: wait;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-online {
+            background-color: var(--success-color);
+        }
+
+        .dot-offline {
+            background-color: var(--danger-color);
+        }
+
+        .dot-syncing {
+            background-color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sistema de Autenticación -->
+    <div id="authSection" class="auth-container">
+        <div class="text-center mb-4">
+            <img src="https://via.placeholder.com/150x50.png/2a4365/ffffff?text=FZ+WMS" alt="Logo FZ WMS" class="mb-4">
+            <h2 class="mb-3">Acceso Socios Logísticos</h2>
+            <div class="alert alert-danger d-none" id="authError"></div>
+        </div>
+        
+        <form id="authForm">
+            <div class="mb-3">
+                <label class="form-label">Clave de Acceso</label>
+                <input type="password" class="form-control" id="accessKey" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right"></i> Ingresar
+            </button>
+        </form>
+    </div>
+
+    <!-- Contenido Principal (Oculto hasta autenticación) -->
+    <div id="mainContent" class="d-none">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg wms-navbar navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-box-seam"></i> FZ WMS
+                    <span class="connection-status ms-2">
+                        <span id="connectionDot" class="connection-dot dot-online"></span>
+                        <small id="connectionStatusText">En línea</small>
+                    </span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link active" href="#dashboard"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#inventario"><i class="bi bi-boxes me-1"></i> Inventario</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#pedidos"><i class="bi bi-clipboard-check me-1"></i> Pedidos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#recogidas"><i class="bi bi-truck me-1"></i> Recogidas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#comisiones"><i class="bi bi-cash-stack me-1"></i> Comisiones</a></li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <span class="text-white me-3">Bienvenido, <span id="userName">Usuario</span></span>
+                        <button class="btn btn-outline-light" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido del Dashboard -->
+        <main class="container my-5">
+            <!-- Sección Dashboard -->
+            <section id="dashboard" class="mb-5">
+                <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <h5 class="mb-0">Inventario Almacenado</h5>
+                            <h1 class="display-5 mb-0" id="inventoryCount">0</h1>
+                            <small>Unidades</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <h5 class="mb-0">Pedidos Activos</h5>
+                            <h1 class="display-5 mb-0" id="activeOrders">0</h1>
+                            <small>Este mes</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <h5 class="mb-0">Tasa de Entrega</h5>
+                            <h1 class="display-5 mb-0" id="deliveryRate">0%</h1>
+                            <small>En tiempo</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <h5 class="mb-0">Comisiones</h5>
+                            <h1 class="display-5 mb-0" id="monthlyCommissions">$0</h1>
+                            <small>Este mes</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-4">
+                    <div class="col-md-6">
+                        <div class="dashboard-card">
+                            <h5 class="mb-3">Últimos Pedidos</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Cliente</th>
+                                            <th>Estado</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrdersTable">
+                                        <!-- Se llena con JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="dashboard-card">
+                            <h5 class="mb-3">Inventario Crítico</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Producto</th>
+                                            <th>Stock</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="criticalInventoryTable">
+                                        <!-- Se llena con JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Inventario -->
+            <section id="inventario" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-boxes me-2"></i>Gestión de Inventario</h2>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                        <i class="bi bi-plus-lg"></i> Agregar Producto
+                    </button>
+                </div>
+
+                <div class="inventory-table">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Ubicación</th>
+                                    <th>Valor Unitario</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Se llena con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Pedidos -->
+            <section id="pedidos" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-clipboard-check me-2"></i>Gestión de Pedidos</h2>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                        <i class="bi bi-plus-lg"></i> Nuevo Pedido
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Solicitud de Recogida -->
+            <section id="recogidas" class="mb-5">
+                <div class="form-section">
+                    <h2 class="mb-4"><i class="bi bi-truck me-2"></i>Solicitud de Recogida</h2>
+                    <form id="pickupForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de Recogida</label>
+                                <input type="date" class="form-control" id="pickupDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Hora Preferida</label>
+                                <input type="time" class="form-control" id="pickupTime" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dirección de Recogida</label>
+                                <textarea class="form-control" rows="3" id="pickupAddress" required></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cantidad de Paquetes</label>
+                                <input type="number" class="form-control" id="pickupPackages" min="1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Peso Total (kg)</label>
+                                <input type="number" class="form-control" id="pickupWeight" step="0.1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo de Embalaje</label>
+                                <select class="form-select" id="pickupPackaging" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Cajas Estándar</option>
+                                    <option>Paletizado</option>
+                                    <option>Contenedor</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="pickupTerms" required>
+                                    <label class="form-check-label">Acepto los términos del servicio</label>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-send-check"></i> Solicitar Recogida
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Estructura de Comisiones -->
+            <section id="comisiones" class="mb-5">
+                <div class="form-section">
+                    <h2 class="mb-4"><i class="bi bi-cash-stack me-2"></i>Estructura de Comisiones</h2>
+                    <div class="fee-structure-table">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Descripción</th>
+                                    <th>Costo</th>
+                                    <th>Comisión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Almacenamiento</td>
+                                    <td>Costo mensual por m³</td>
+                                    <td>$15.000/mes</td>
+                                    <td>10%</td>
+                                </tr>
+                                <tr>
+                                    <td>Preparación de Pedido</td>
+                                    <td>Por ítem procesado</td>
+                                    <td>$2.500/ítem</td>
+                                    <td>15%</td>
+                                </tr>
+                                <tr>
+                                    <td>Envío Estándar</td>
+                                    <td>Por envío nacional</td>
+                                    <td>$12.000 - $25.000</td>
+                                    <td>12%</td>
+                                </tr>
+                                <tr>
+                                    <td>Manejo Especial</td>
+                                    <td>Productos frágiles/peligrosos</td>
+                                    <td>+30% costo base</td>
+                                    <td>8%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-4">
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h5>Soporte</h5>
+                        <p class="mb-1"><i class="bi bi-telephone"></i> +57 601 234 5678</p>
+                        <p class="mb-0"><i class="bi bi-whatsapp"></i> +57 321 987 6543</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Legal</h5>
+                        <p class="mb-1"><a href="#" class="text-white">Términos de Servicio</a></p>
+                        <p class="mb-0"><a href="#" class="text-white">Política de Privacidad</a></p>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <p class="mb-0">&copy; 2024 FZ WMS. Todos los derechos reservados.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modales -->
+    <div class="modal fade" id="addInventoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Agregar Producto al Inventario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addInventoryForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="inventorySKU" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Producto</label>
+                                <input type="text" class="form-control" id="inventoryName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" id="inventoryCategory" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Electrónicos</option>
+                                    <option>Ropa</option>
+                                    <option>Hogar</option>
+                                    <option>Alimentos</option>
+                                    <option>Belleza</option>
+                                    <option>Otros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="inventoryQuantity" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ubicación en Bodega</label>
+                                <input type="text" class="form-control" id="inventoryLocation" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Valor Unitario</label>
+                                <input type="number" class="form-control" id="inventoryValue" min="0" step="0.01" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" rows="2" id="inventoryDescription"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveInventoryItem()">Guardar Producto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear pedido -->
+    <div class="modal fade" id="createOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-clipboard-plus me-2"></i>Crear Nuevo Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createOrderForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente</label>
+                                <input type="text" class="form-control" id="orderClient" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de Entrega</label>
+                                <input type="date" class="form-control" id="orderDeliveryDate" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dirección de Entrega</label>
+                                <textarea class="form-control" rows="2" id="orderAddress" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <h6 class="mb-3">Productos</h6>
+                                <div id="orderProductsList">
+                                    <p class="text-muted">No hay productos agregados</p>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="showAddProductModal()">
+                                    <i class="bi bi-plus"></i> Agregar Producto
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Notas</label>
+                                <textarea class="form-control" rows="2" id="orderNotes"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrder()">Crear Pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle"></i> Éxito</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalSuccessMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-x-circle"></i> Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalErrorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-question-circle"></i> Confirmación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmAction">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container">
+        <div class="toast align-items-center text-white bg-success" role="alert" id="successToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span id="successToastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div class="toast align-items-center text-white bg-danger" role="alert" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span id="errorToastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores de estado -->
+    <div class="offline-badge" id="offlineBadge">
+        <i class="bi bi-wifi-off"></i> Sin conexión
+    </div>
+    <div class="sync-status" id="syncStatus">
+        <i class="bi bi-arrow-repeat"></i> Sincronizando cambios...
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuración inicial
+        const APP_NAME = "FZ WMS Híbrido";
+        const APP_VERSION = "1.0.0";
+        const APP_DATA_KEY = "fzwms_hybrid_data";
+        
+        // Credenciales válidas
+        const ACCESS_KEYS = ["FZWMS2024", "LOGISTICA2024", "ALMACEN123"];
+        
+        // Endpoints para envío de datos
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqkrvezw"; // Reemplazar con tu endpoint de Formspree
+        const WORKER_ENDPOINT = "https://fzwms-worker.your-domain.workers.dev"; // Reemplazar con tu endpoint de Cloudflare Worker
+        
+        // Datos iniciales de la aplicación
+        let appData = {
+            inventory: [
+                { sku: "FZ-1001", name: "Smartphone X", category: "Electrónicos", quantity: 45, location: "A-12", value: 1200000 },
+                { sku: "FZ-1002", name: "Laptop Pro", category: "Electrónicos", quantity: 18, location: "A-15", value: 2500000 },
+                { sku: "FZ-2001", name: "Camiseta Básica", category: "Ropa", quantity: 120, location: "B-03", value: 45000 },
+                { sku: "FZ-2002", name: "Jeans Clásico", category: "Ropa", quantity: 35, location: "B-05", value: 120000 },
+                { sku: "FZ-3001", name: "Set de Cocina", category: "Hogar", quantity: 22, location: "C-08", value: 180000 }
+            ],
+            orders: [
+                { id: "ORD-1001", client: "Cliente A", date: "2024-03-15", status: "Entregado", total: 1250000, items: [
+                    { sku: "FZ-1001", name: "Smartphone X", quantity: 1, price: 1200000 }
+                ]},
+                { id: "ORD-1002", client: "Cliente B", date: "2024-03-18", status: "Enviado", total: 3700000, items: [
+                    { sku: "FZ-1002", name: "Laptop Pro", quantity: 1, price: 2500000 },
+                    { sku: "FZ-2002", name: "Jeans Clásico", quantity: 2, price: 120000 }
+                ]},
+                { id: "ORD-1003", client: "Cliente C", date: "2024-03-20", status: "En Proceso", total: 225000, items: [
+                    { sku: "FZ-2001", name: "Camiseta Básica", quantity: 5, price: 45000 }
+                ]}
+            ],
+            pickups: [
+                { id: "PICK-1001", date: "2024-03-10", time: "14:00", address: "Calle 123 #45-67", packages: 3, weight: 5.2, status: "Completado" },
+                { id: "PICK-1002", date: "2024-03-15", time: "10:30", address: "Avenida 5 #22-10", packages: 1, weight: 0.8, status: "Completado" }
+            ],
+            settings: {
+                lowStockThreshold: 10,
+                criticalStockThreshold: 5
+            },
+            offlineChanges: []
+        };
+
+        // Estado de la aplicación
+        let appState = {
+            isOnline: navigator.onLine,
+            isSyncing: false,
+            currentUser: null,
+            currentOrder: {
+                items: []
+            }
+        };
+
+        // Inicialización de la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAppData();
+            setupEventListeners();
+            checkConnectionStatus();
+            
+            // Escuchar cambios en la conexión
+            window.addEventListener('online', handleConnectionChange);
+            window.addEventListener('offline', handleConnectionChange);
+        });
+
+        // Cargar datos guardados localmente
+        function loadAppData() {
+            const savedData = localStorage.getItem(APP_DATA_KEY);
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                console.log("Datos cargados desde localStorage");
+            } else {
+                // Usar datos iniciales y guardarlos
+                saveAppData();
+            }
+        }
+
+        // Guardar datos localmente
+        function saveAppData() {
+            localStorage.setItem(APP_DATA_KEY, JSON.stringify(appData));
+            console.log("Datos guardados en localStorage");
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Formulario de autenticación
+            document.getElementById('authForm').addEventListener('submit', handleAuth);
+            
+            // Formulario de recogida
+            document.getElementById('pickupForm').addEventListener('submit', handlePickupForm);
+            
+            // Configurar fecha mínima para recogidas (hoy)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pickupDate').min = today;
+        }
+
+        // Manejo de conexión
+        function checkConnectionStatus() {
+            appState.isOnline = navigator.onLine;
+            updateConnectionUI();
+            
+            if (appState.isOnline) {
+                // Intentar sincronizar cambios pendientes
+                syncPendingChanges();
+            }
+        }
+
+        function handleConnectionChange() {
+            checkConnectionStatus();
+            
+            if (appState.isOnline) {
+                showToast('success', 'Conexión restablecida. Sincronizando datos...');
+            } else {
+                showToast('warning', 'Sin conexión. Trabajando en modo local.');
+            }
+        }
+
+        function updateConnectionUI() {
+            const connectionDot = document.getElementById('connectionDot');
+            const statusText = document.getElementById('connectionStatusText');
+            const offlineBadge = document.getElementById('offlineBadge');
+            
+            if (appState.isOnline) {
+                connectionDot.className = 'connection-dot dot-online';
+                statusText.textContent = 'En línea';
+                offlineBadge.style.display = 'none';
+            } else {
+                connectionDot.className = 'connection-dot dot-offline';
+                statusText.textContent = 'Sin conexión';
+                offlineBadge.style.display = 'flex';
+            }
+            
+            if (appState.isSyncing) {
+                connectionDot.className = 'connection-dot dot-syncing';
+                statusText.textContent = 'Sincronizando...';
+            }
+        }
+
+        // Sincronización de datos pendientes
+        function syncPendingChanges() {
+            if (!appState.isOnline || appState.isSyncing || appData.offlineChanges.length === 0) return;
+            
+            appState.isSyncing = true;
+            updateConnectionUI();
+            document.getElementById('syncStatus').style.display = 'flex';
+            
+            // Procesar cambios pendientes
+            const changesToSync = [...appData.offlineChanges];
+            const promises = [];
+            
+            changesToSync.forEach(change => {
+                if (change.type === 'pickup') {
+                    promises.push(sendPickupRequest(change.data));
+                }
+                // Puedes agregar más tipos de cambios aquí
+            });
+            
+            // Intentar enviar todos los cambios
+            Promise.all(promises)
+                .then(() => {
+                    // Eliminar cambios sincronizados
+                    appData.offlineChanges = appData.offlineChanges.filter(c => 
+                        !changesToSync.some(s => s.timestamp === c.timestamp)
+                    );
+                    saveAppData();
+                    
+                    showToast('success', `Datos sincronizados: ${changesToSync.length} cambios enviados`);
+                })
+                .catch(error => {
+                    console.error('Error al sincronizar cambios:', error);
+                    showToast('error', 'Error al sincronizar algunos cambios. Se reintentará más tarde.');
+                })
+                .finally(() => {
+                    appState.isSyncing = false;
+                    updateConnectionUI();
+                    document.getElementById('syncStatus').style.display = 'none';
+                });
+        }
+
+        // Sistema de Autenticación
+        function handleAuth(e) {
+            e.preventDefault();
+            const accessKey = document.getElementById('accessKey').value;
+            
+            if(ACCESS_KEYS.includes(accessKey)) {
+                localStorage.setItem('authToken', accessKey);
+                document.getElementById('authSection').classList.add('d-none');
+                document.getElementById('mainContent').classList.remove('d-none');
+                appState.currentUser = accessKey;
+                document.getElementById('userName').textContent = "Usuario " + accessKey.slice(-3);
+                updateUI();
+                showToast('success', 'Sesión iniciada correctamente');
+            } else {
+                document.getElementById('authError').textContent = 'Clave de acceso inválida';
+                document.getElementById('authError').classList.remove('d-none');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.reload();
+        }
+
+        // Actualizar la interfaz de usuario
+        function updateUI() {
+            updateDashboard();
+            updateInventoryTable();
+            updateOrdersTable();
+            updateCriticalInventory();
+            updateRecentOrders();
+        }
+
+        // Actualizar el dashboard
+        function updateDashboard() {
+            // Contar inventario
+            const totalInventory = appData.inventory.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('inventoryCount').textContent = totalInventory.toLocaleString();
+            
+            // Contar pedidos activos
+            const activeOrders = appData.orders.filter(o => o.status !== 'Entregado').length;
+            document.getElementById('activeOrders').textContent = activeOrders;
+            
+            // Calcular tasa de entrega
+            const deliveredOrders = appData.orders.filter(o => o.status === 'Entregado').length;
+            const totalOrders = appData.orders.length;
+            const deliveryRate = totalOrders > 0 ? (deliveredOrders / totalOrders * 100).toFixed(1) : 0;
+            document.getElementById('deliveryRate').textContent = `${deliveryRate}%`;
+            
+            // Calcular comisiones (simplificado)
+            const monthlyCommissions = appData.orders
+                .filter(o => o.date.startsWith('2024-03')) // Este mes
+                .reduce((sum, order) => sum + (order.total * 0.1), 0); // 10% de comisión
+            document.getElementById('monthlyCommissions').textContent = `$${Math.round(monthlyCommissions).toLocaleString()}`;
+        }
+
+        // Actualizar tabla de inventario
+        function updateInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+            
+            appData.inventory.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de stock bajo/crítico
+                let rowClass = '';
+                if (item.quantity <= appData.settings.criticalStockThreshold) {
+                    rowClass = 'inventory-critical';
+                } else if (item.quantity <= appData.settings.lowStockThreshold) {
+                    rowClass = 'inventory-low';
+                }
+                
+                row.className = rowClass;
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.location}</td>
+                    <td>$${item.value.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editInventoryItem('${item.sku}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteInventory('${item.sku}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar tabla de pedidos
+        function updateOrdersTable() {
+            const tbody = document.getElementById('ordersTable');
+            tbody.innerHTML = '';
+            
+            appData.orders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de estado
+                let statusClass = '';
+                let statusText = '';
+                switch(order.status) {
+                    case 'Pendiente':
+                        statusClass = 'status-pending';
+                        statusText = 'Pendiente';
+                        break;
+                    case 'En Proceso':
+                        statusClass = 'status-processing';
+                        statusText = 'En Proceso';
+                        break;
+                    case 'Enviado':
+                        statusClass = 'status-shipped';
+                        statusText = 'Enviado';
+                        break;
+                    case 'Entregado':
+                        statusClass = 'status-delivered';
+                        statusText = 'Entregado';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.client}</td>
+                    <td>${formatDate(order.date)}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>$${order.total.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetails('${order.id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar inventario crítico
+        function updateCriticalInventory() {
+            const tbody = document.getElementById('criticalInventoryTable');
+            tbody.innerHTML = '';
+            
+            const criticalItems = appData.inventory.filter(item => 
+                item.quantity <= appData.settings.criticalStockThreshold
+            ).slice(0, 5); // Mostrar solo los 5 más críticos
+            
+            if (criticalItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            No hay productos con stock crítico
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            criticalItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'inventory-critical';
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="reorderInventory('${item.sku}')">
+                            <i class="bi bi-arrow-repeat"></i> Reabastecer
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar pedidos recientes
+        function updateRecentOrders() {
+            const tbody = document.getElementById('recentOrdersTable');
+            tbody.innerHTML = '';
+            
+            const recentOrders = [...appData.orders]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5); // Mostrar solo los 5 más recientes
+            
+            recentOrders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de estado
+                let statusClass = '';
+                let statusText = '';
+                switch(order.status) {
+                    case 'Pendiente':
+                        statusClass = 'status-pending';
+                        statusText = 'Pendiente';
+                        break;
+                    case 'En Proceso':
+                        statusClass = 'status-processing';
+                        statusText = 'En Proceso';
+                        break;
+                    case 'Enviado':
+                        statusClass = 'status-shipped';
+                        statusText = 'Enviado';
+                        break;
+                    case 'Entregado':
+                        statusClass = 'status-delivered';
+                        statusText = 'Entregado';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.client}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>$${order.total.toLocaleString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Manejo de formulario de recogida
+        function handlePickupForm(e) {
+            e.preventDefault();
+            
+            const pickupData = {
+                id: `PICK-${Math.floor(1000 + Math.random() * 9000)}`,
+                date: document.getElementById('pickupDate').value,
+                time: document.getElementById('pickupTime').value,
+                address: document.getElementById('pickupAddress').value,
+                packages: parseInt(document.getElementById('pickupPackages').value),
+                weight: parseFloat(document.getElementById('pickupWeight').value),
+                packaging: document.getElementById('pickupPackaging').value,
+                status: 'Programado',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Agregar a los datos locales
+            appData.pickups.push(pickupData);
+            
+            if (appState.isOnline) {
+                // Intentar enviar a ambos endpoints
+                Promise.all([
+                    sendToFormspree(pickupData),
+                    sendToWorker(pickupData)
+                ]).then(() => {
+                    saveAppData();
+                    showToast('success', 'Recogida programada y datos enviados');
+                    e.target.reset();
+                }).catch(error => {
+                    console.error('Error al enviar recogida:', error);
+                    // Guardar como cambio pendiente
+                    appData.offlineChanges.push({
+                        type: 'pickup',
+                        data: pickupData,
+                        timestamp: new Date().toISOString()
+                    });
+                    saveAppData();
+                    showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
+                    e.target.reset();
+                });
+            } else {
+                // Guardar como cambio pendiente
+                appData.offlineChanges.push({
+                    type: 'pickup',
+                    data: pickupData,
+                    timestamp: new Date().toISOString()
+                });
+                saveAppData();
+                showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
+                e.target.reset();
+            }
+        }
+
+        // Enviar a Formspree
+        function sendToFormspree(data) {
+            return fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    type: 'pickup_request',
+                    app: APP_NAME,
+                    version: APP_VERSION
+                })
+            }).then(response => {
+                if (!response.ok) throw new Error('Error en respuesta de Formspree');
+                return response.json();
+            });
+        }
+
+        // Enviar a Cloudflare Worker
+        function sendToWorker(data) {
+            return fetch(WORKER_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    type: 'pickup_request',
+                    app: APP_NAME,
+                    version: APP_VERSION
+                })
+            }).then(response => {
+                if (!response.ok) throw new Error('Error en respuesta del Worker');
+                return response.json();
+            });
+        }
+
+        // Función para enviar recogida (usada en sincronización)
+        function sendPickupRequest(data) {
+            return Promise.all([
+                sendToFormspree(data),
+                sendToWorker(data)
+            ]);
+        }
+
+        // Funciones para inventario
+        function saveInventoryItem() {
+            const newItem = {
+                sku: document.getElementById('inventorySKU').value,
+                name: document.getElementById('inventoryName').value,
+                category: document.getElementById('inventoryCategory').value,
+                quantity: parseInt(document.getElementById('inventoryQuantity').value),
+                location: document.getElementById('inventoryLocation').value,
+                value: parseFloat(document.getElementById('inventoryValue').value),
+                description: document.getElementById('inventoryDescription').value
+            };
+            
+            // Verificar si es edición o nuevo
+            const existingIndex = appData.inventory.findIndex(item => item.sku === newItem.sku);
+            
+            if (existingIndex >= 0) {
+                // Edición
+                appData.inventory[existingIndex] = newItem;
+            } else {
+                // Nuevo item
+                appData.inventory.push(newItem);
+            }
+            
+            saveAppData();
+            updateUI();
+            
+            // Cerrar modal y mostrar confirmación
+            bootstrap.Modal.getInstance(document.getElementById('addInventoryModal')).hide();
+            showToast('success', `Producto ${existingIndex >= 0 ? 'actualizado' : 'agregado'} correctamente`);
+        }
+
+        function editInventoryItem(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            // Llenar formulario con datos del item
+            document.getElementById('inventorySKU').value = item.sku;
+            document.getElementById('inventoryName').value = item.name;
+            document.getElementById('inventoryCategory').value = item.category;
+            document.getElementById('inventoryQuantity').value = item.quantity;
+            document.getElementById('inventoryLocation').value = item.location;
+            document.getElementById('inventoryValue').value = item.value;
+            document.getElementById('inventoryDescription').value = item.description || '';
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('addInventoryModal'));
+            modal.show();
+        }
+
+        function confirmDeleteInventory(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            document.getElementById('confirmMessage').textContent = `¿Está seguro que desea eliminar el producto ${item.name} (${item.sku})?`;
+            
+            const confirmBtn = document.getElementById('confirmAction');
+            confirmBtn.onclick = function() {
+                deleteInventoryItem(sku);
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            };
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        function deleteInventoryItem(sku) {
+            appData.inventory = appData.inventory.filter(item => item.sku !== sku);
+            saveAppData();
+            updateUI();
+            showToast('success', 'Producto eliminado correctamente');
+        }
+
+        function reorderInventory(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            // Simular reabastecimiento (aumentar stock en 20 unidades)
+            const newQuantity = item.quantity + 20;
+            item.quantity = newQuantity;
+            saveAppData();
+            updateUI();
+            
+            showToast('success', `Producto ${item.name} reabastecido. Nuevo stock: ${newQuantity}`);
+        }
+
+        // Funciones para pedidos
+        function viewOrderDetails(orderId) {
+            const order = appData.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            // Mostrar detalles en un modal
+            let itemsList = order.items.map(item => 
+                `${item.name} (${item.sku}) - ${item.quantity} x $${item.price.toLocaleString()} = $${(item.quantity * item.price).toLocaleString()}`
+            ).join('\n');
+            
+            showModal('success', `Detalles del pedido ${orderId}\n\nCliente: ${order.client}\nFecha: ${formatDate(order.date)}\nEstado: ${order.status}\nTotal: $${order.total.toLocaleString()}\n\nProductos:\n${itemsList}`);
+        }
+
+        function showAddProductModal() {
+            // En una aplicación real, mostraría un modal para seleccionar productos del inventario
+            showToast('info', 'Seleccionar producto del inventario');
+        }
+
+        function saveOrder() {
+            const client = document.getElementById('orderClient').value;
+            const deliveryDate = document.getElementById('orderDeliveryDate').value;
+            const address = document.getElementById('orderAddress').value;
+            const notes = document.getElementById('orderNotes').value;
+            
+            if (!client || !deliveryDate || !address) {
+                showToast('error', 'Complete todos los campos requeridos');
+                return;
+            }
+            
+            if (appState.currentOrder.items.length === 0) {
+                showToast('error', 'Agregue al menos un producto al pedido');
+                return;
+            }
+            
+            const newOrder = {
+                id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+                client: client,
+                date: new Date().toISOString().split('T')[0],
+                deliveryDate: deliveryDate,
+                address: address,
+                status: 'Pendiente',
+                items: [...appState.currentOrder.items],
+                total: appState.currentOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                notes: notes
+            };
+            
+            // Agregar a los pedidos
+            appData.orders.push(newOrder);
+            saveAppData();
+            
+            // Limpiar orden actual
+            appState.currentOrder.items = [];
+            
+            // Cerrar modal y actualizar UI
+            bootstrap.Modal.getInstance(document.getElementById('createOrderModal')).hide();
+            updateUI();
+            showToast('success', `Pedido ${newOrder.id} creado exitosamente`);
+        }
+
+        // Funciones de utilidad
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        function showToast(type, message) {
+            const toastEl = type === 'success' ? document.getElementById('successToast') : document.getElementById('errorToast');
+            const toastMessage = type === 'success' ? document.getElementById('successToastMessage') : document.getElementById('errorToastMessage');
+            
+            toastMessage.textContent = message;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        function showModal(type, message) {
+            const modalEl = document.getElementById(type === 'success' ? 'successModal' : 'errorModal');
+            const messageEl = document.getElementById(type === 'success' ? 'modalSuccessMessage' : 'modalErrorMessage');
+            
+            messageEl.textContent = message;
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    </script>
+</body>
+</html>
