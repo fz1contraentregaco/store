@@ -1,275 +1,526 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Business Frontpage - Start Bootstrap Template</title>
-        <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Bootstrap icons-->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
-    </head>
-    <body>
-        <!-- Responsive navbar-->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container px-5">
-                <a class="navbar-brand" href="#!">Contraentregaco FZ1</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Facebook</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Whatsapp</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Telegram</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Wechat</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.html">Acceso</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <!-- Header-->
-        <header class="bg-dark py-5">
-            <div class="container px-5">
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-6">
-                        <div class="text-center my-5">
-                            <h1 class="display-5 fw-bolder text-white mb-2">Present your business in a whole new way</h1>
-                            <p class="lead text-white-50 mb-4">Quickly design and customize responsive mobile-first sites with Bootstrap, the world's most popular front-end open source toolkit!</p>
-                            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                                <a class="btn btn-primary btn-lg px-4 me-sm-3" href="index.html">Acceso</a>
-                                <a class="btn btn-outline-light btn-lg px-4" href="#!">Crear Cuenta</a>
-                            </div>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contraentregaco FZ1</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 30px;
+            background-color: #000;
+            border-radius: 8px;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .feature {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-section {
+            display: none;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+        
+        .auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Database simulation (JSON) -->
+    <script id="app-data" type="application/json">
+        {
+            "users": [
+                {"username": "admin", "password": "admin123", "key": "ABC123"},
+                {"username": "user1", "password": "pass123", "key": "XYZ789"}
+            ],
+            "content": {
+                "home": {
+                    "title": "Bienvenido al Sistema",
+                    "description": "Sistema de gestión integral para tu negocio."
+                },
+                "features": {
+                    "title": "Nuestras Características",
+                    "items": [
+                        {
+                            "icon": "bi-collection",
+                            "title": "Gestión Completa",
+                            "description": "Control total sobre todos tus procesos empresariales."
+                        },
+                        {
+                            "icon": "bi-building",
+                            "title": "Multiplataforma",
+                            "description": "Accede desde cualquier dispositivo en cualquier momento."
+                        },
+                        {
+                            "icon": "bi-toggles2",
+                            "title": "Personalizable",
+                            "description": "Adapta el sistema a tus necesidades específicas."
+                        }
+                    ]
+                },
+                "pricing": {
+                    "title": "Planes de Suscripción",
+                    "description": "Elige el plan que mejor se adapte a tus necesidades",
+                    "plans": [
+                        {
+                            "name": "Básico",
+                            "price": "$0",
+                            "period": "/mes",
+                            "features": [
+                                "1 usuario",
+                                "5GB almacenamiento",
+                                "Proyectos públicos ilimitados",
+                                "Acceso a la comunidad"
+                            ],
+                            "limitations": [
+                                "Proyectos privados",
+                                "Soporte prioritario",
+                                "Dominio personalizado"
+                            ],
+                            "button": "Registrarse"
+                        },
+                        {
+                            "name": "PRO",
+                            "price": "$9",
+                            "period": "/mes",
+                            "features": [
+                                "5 usuarios",
+                                "10GB almacenamiento",
+                                "Proyectos ilimitados",
+                                "Soporte prioritario",
+                                "Dominio personalizado"
+                            ],
+                            "limitations": [
+                                "Reportes mensuales"
+                            ],
+                            "button": "Actualizar a PRO"
+                        },
+                        {
+                            "name": "Empresarial",
+                            "price": "$49",
+                            "period": "/mes",
+                            "features": [
+                                "Usuarios ilimitados",
+                                "Almacenamiento ilimitado",
+                                "Todos los features PRO",
+                                "Reportes mensuales",
+                                "Soporte 24/7"
+                            ],
+                            "limitations": [],
+                            "button": "Contactar ventas"
+                        }
+                    ]
+                }
+            }
+        }
+    </script>
+
+    <!-- App Container -->
+    <div id="app-container">
+        <!-- Login Section -->
+        <section id="login-section" class="py-5">
+            <div class="container">
+                <div class="auth-container">
+                    <h2 class="text-center mb-4">Acceso al Sistema</h2>
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-key" class="form-label">Clave Privada</label>
+                            <input type="password" class="form-control" id="login-key" required>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <!-- Video Section -->
-        <section class="py-5">
-            <div class="container px-5 my-5">
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-8 col-xl-6">
-                        <div class="text-center">
-                            <h2 class="fw-bolder">Video Demonstration</h2>
-                            <p class="lead fw-normal text-muted mb-5">Watch how our product works</p>
+                        <div class="mb-3">
+                            <label for="login-username" class="form-label">Usuario</label>
+                            <input type="text" class="form-control" id="login-username" required>
                         </div>
-                    </div>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/9No-FiEInLA" allowfullscreen></iframe>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="login-password" required>
                         </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                        <div class="text-center mt-3">
+                            <a href="#" onclick="showSection('register-section')">¿No tienes cuenta? Regístrate</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
-        <!-- Features section-->
-        <section class="py-5 border-bottom" id="features">
-            <div class="container px-5 my-5">
-                <div class="row gx-5">
+
+        <!-- Register Section -->
+        <section id="register-section" class="py-5" style="display:none;">
+            <div class="container">
+                <div class="auth-container">
+                    <h2 class="text-center mb-4">Registro de Usuario</h2>
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-key" class="form-label">Clave Privada</label>
+                            <input type="password" class="form-control" id="register-key" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-username" class="form-label">Usuario</label>
+                            <input type="text" class="form-control" id="register-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="register-password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-confirm" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" class="form-control" id="register-confirm" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+                        <div class="text-center mt-3">
+                            <a href="#" onclick="showSection('login-section')">¿Ya tienes cuenta? Inicia sesión</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main App (hidden until login) -->
+        <div id="main-app" style="display:none;">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container px-5">
+                    <a class="navbar-brand" href="#" onclick="showPage('home-page')">Contraentregaco FZ1</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="main-nav">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="showPage('home-page')">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showPage('features-page')">Características</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showPage('pricing-page')">Precios</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="showPage('video-page')">Video</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="logout()">Cerrar sesión</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Pages -->
+            <div id="pages-container">
+                <!-- Home Page -->
+                <section id="home-page" class="page-section py-5 active">
+                    <header class="bg-dark py-5">
+                        <div class="container px-5">
+                            <div class="row gx-5 justify-content-center">
+                                <div class="col-lg-6">
+                                    <div class="text-center my-5">
+                                        <h1 class="display-5 fw-bolder text-white mb-2" id="home-title">Bienvenido al Sistema</h1>
+                                        <p class="lead text-white-50 mb-4" id="home-description">Sistema de gestión integral para tu negocio.</p>
+                                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                                            <a class="btn btn-primary btn-lg px-4 me-sm-3" href="#" onclick="showPage('features-page')">Ver características</a>
+                                            <a class="btn btn-outline-light btn-lg px-4" href="#" onclick="showPage('pricing-page')">Ver planes</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                </section>
+
+                <!-- Features Page -->
+                <section id="features-page" class="page-section py-5 border-bottom">
+                    <div class="container px-5 my-5">
+                        <div class="text-center mb-5">
+                            <h2 class="fw-bolder" id="features-title">Nuestras Características</h2>
+                        </div>
+                        <div class="row gx-5" id="features-container">
+                            <!-- Features will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pricing Page -->
+                <section id="pricing-page" class="page-section bg-light py-5 border-bottom">
+                    <div class="container px-5 my-5">
+                        <div class="text-center mb-5">
+                            <h2 class="fw-bolder" id="pricing-title">Planes de Suscripción</h2>
+                            <p class="lead mb-0" id="pricing-description">Elige el plan que mejor se adapte a tus necesidades</p>
+                        </div>
+                        <div class="row gx-5 justify-content-center" id="pricing-container">
+                            <!-- Pricing plans will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Video Page -->
+                <section id="video-page" class="page-section py-5">
+                    <div class="container px-5 my-5">
+                        <div class="row gx-5 justify-content-center">
+                            <div class="col-lg-8 col-xl-6">
+                                <div class="text-center">
+                                    <h2 class="fw-bolder">Video Demostración</h2>
+                                    <p class="lead fw-normal text-muted mb-5">Mira cómo funciona nuestro producto</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row gx-5 justify-content-center">
+                            <div class="col-lg-10">
+                                <div class="video-container">
+                                    <!-- Replace with your actual video file -->
+                                    <iframe src="video.mp4" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Footer -->
+            <footer class="py-5 bg-dark">
+                <div class="container px-5">
+                    <p class="m-0 text-center text-white">Contraentregaco FZ1 &copy; 2023</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- App Script -->
+    <script>
+        // App data
+        const appData = JSON.parse(document.getElementById('app-data').textContent);
+        let currentUser = null;
+
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const mainApp = document.getElementById('main-app');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in (from sessionStorage)
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+                loadContent();
+            }
+
+            // Login form handler
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const key = document.getElementById('login-key').value;
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                
+                // Validate credentials
+                const user = appData.users.find(u => 
+                    u.key === key && 
+                    u.username === username && 
+                    u.password === password
+                );
+                
+                if (user) {
+                    currentUser = user;
+                    sessionStorage.setItem('currentUser', JSON.stringify(user));
+                    showMainApp();
+                    loadContent();
+                    showPage('home-page');
+                } else {
+                    alert('Credenciales incorrectas. Intente nuevamente.');
+                }
+            });
+
+            // Register form handler
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const key = document.getElementById('register-key').value;
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                const confirm = document.getElementById('register-confirm').value;
+                
+                // Validate form
+                if (password !== confirm) {
+                    alert('Las contraseñas no coinciden.');
+                    return;
+                }
+                
+                if (appData.users.some(u => u.username === username)) {
+                    alert('El nombre de usuario ya existe.');
+                    return;
+                }
+                
+                // Add new user
+                const newUser = {
+                    username: username,
+                    password: password,
+                    key: key
+                };
+                
+                appData.users.push(newUser);
+                currentUser = newUser;
+                sessionStorage.setItem('currentUser', JSON.stringify(newUser));
+                
+                // Update the JSON data (simulated)
+                document.getElementById('app-data').textContent = JSON.stringify(appData);
+                
+                showMainApp();
+                loadContent();
+                showPage('home-page');
+            });
+        });
+
+        // Show section function
+        function showSection(sectionId) {
+            loginSection.style.display = sectionId === 'login-section' ? 'block' : 'none';
+            registerSection.style.display = sectionId === 'register-section' ? 'block' : 'none';
+        }
+
+        // Show main app after login
+        function showMainApp() {
+            loginSection.style.display = 'none';
+            registerSection.style.display = 'none';
+            mainApp.style.display = 'block';
+        }
+
+        // Logout function
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            mainApp.style.display = 'none';
+            loginSection.style.display = 'block';
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-key').value = '';
+        }
+
+        // Show page function
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Load content from JSON
+        function loadContent() {
+            // Load home content
+            document.getElementById('home-title').textContent = appData.content.home.title;
+            document.getElementById('home-description').textContent = appData.content.home.description;
+            
+            // Load features
+            const featuresContainer = document.getElementById('features-container');
+            featuresContainer.innerHTML = '';
+            
+            appData.content.features.items.forEach(feature => {
+                featuresContainer.innerHTML += `
                     <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
+                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3">
+                            <i class="bi ${feature.icon}"></i>
+                        </div>
+                        <h2 class="h4 fw-bolder">${feature.title}</h2>
+                        <p>${feature.description}</p>
+                        <a class="text-decoration-none" href="#" onclick="showPage('pricing-page')">
+                            Ver planes
                             <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
-                    <div class="col-lg-4 mb-5 mb-lg-0">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-building"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
-                        <h2 class="h4 fw-bolder">Featured title</h2>
-                        <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and probably just keep going until we run out of words.</p>
-                        <a class="text-decoration-none" href="#!">
-                            Call to action
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Pricing section-->
-        <section class="bg-light py-5 border-bottom">
-            <div class="container px-5 my-5">
-                <div class="text-center mb-5">
-                    <h2 class="fw-bolder">Pay as you grow</h2>
-                    <p class="lead mb-0">With our no hassle pricing plans</p>
-                </div>
-                <div class="row gx-5 justify-content-center">
-                    <!-- Pricing card free-->
+                `;
+            });
+            
+            // Load pricing
+            document.getElementById('pricing-title').textContent = appData.content.pricing.title;
+            document.getElementById('pricing-description').textContent = appData.content.pricing.description;
+            
+            const pricingContainer = document.getElementById('pricing-container');
+            pricingContainer.innerHTML = '';
+            
+            appData.content.pricing.plans.forEach((plan, index) => {
+                const isPro = plan.name === 'PRO';
+                const isEnterprise = plan.name === 'Empresarial';
+                
+                pricingContainer.innerHTML += `
                     <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
+                        <div class="card mb-5 mb-xl-0 ${isPro ? 'mb-xl-0' : ''}">
                             <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold text-muted">Gratis</div>
+                                <div class="small text-uppercase fw-bold ${isPro ? '' : 'text-muted'}">
+                                    ${isPro ? '<i class="bi bi-star-fill text-warning"></i>' : ''}
+                                    ${plan.name}
+                                </div>
                                 <div class="mb-3">
-                                    <span class="display-4 fw-bold">$0</span>
-                                    <span class="text-muted">/ mo.</span>
+                                    <span class="display-4 fw-bold">${plan.price}</span>
+                                    <span class="text-muted">${plan.period}</span>
                                 </div>
                                 <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>1 users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Unlimited private projects
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Dedicated support
-                                    </li>
-                                    <li class="mb-2 text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Free linked domain
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Monthly status reports
-                                    </li>
+                                    ${plan.features.map(f => `
+                                        <li class="mb-2">
+                                            <i class="bi bi-check text-primary"></i>
+                                            ${f}
+                                        </li>
+                                    `).join('')}
+                                    ${plan.limitations.map(l => `
+                                        <li class="mb-2 text-muted">
+                                            <i class="bi bi-x"></i>
+                                            ${l}
+                                        </li>
+                                    `).join('')}
                                 </ul>
-                                <div class="d-grid"><a class="btn btn-outline-primary" href="#!">Crear Cuenta</a></div>
+                                <div class="d-grid">
+                                    <a class="btn ${isPro ? 'btn-primary' : 'btn-outline-primary'}" href="#">
+                                        ${plan.button}
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Pricing card pro-->
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card mb-5 mb-xl-0">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold">
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                    PRO
-                                </div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$9</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>5 users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited private projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Dedicated support
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Free linked domain
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-x"></i>
-                                        Monthly status reports
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-primary" href="#!">Mejorar Cuenta a PRO</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Pricing card enterprise-->
-                    <div class="col-lg-6 col-xl-4">
-                        <div class="card">
-                            <div class="card-body p-5">
-                                <div class="small text-uppercase fw-bold text-muted">FZ
-                                </div>
-                                <div class="mb-3">
-                                    <span class="display-4 fw-bold">$49</span>
-                                    <span class="text-muted">/ mo.</span>
-                                </div>
-                                <ul class="list-unstyled mb-4">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>Unlimited users</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        5GB storage
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited public projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Community access
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Unlimited private projects
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Dedicated support
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check text-primary"></i>
-                                        <strong>Unlimited</strong>
-                                        linked domains
-                                    </li>
-                                    <li class="text-muted">
-                                        <i class="bi bi-check text-primary"></i>
-                                        Monthly status reports
-                                    </li>
-                                </ul>
-                                <div class="d-grid"><a class="btn btn-outline-primary" href="#!">Mejorar Cuenta a FZ</a></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Footer-->
-        <footer class="py-5 bg-dark">
-            <div class="container px-5"><p class="m-0 text-center text-white">Tor:</p></div>
-        </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Core theme JS-->
-        <script src="js/scripts.js"></script>
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
-        <!-- * *                               SB Forms JS                               * *-->
-        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
-        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
-    </body>
+                `;
+            });
+        }
+    </script>
+</body>
 </html>
