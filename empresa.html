@@ -13,12 +13,17 @@
             --secondary-color: #2b6cb0;
             --accent-color: #4299e1;
             --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
         }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: #f7fafc;
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .auth-container {
@@ -41,11 +46,13 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
         }
 
         .dashboard-card:hover {
             transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
         }
 
         .commission-badge {
@@ -54,6 +61,7 @@
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
+            display: inline-block;
         }
 
         .inventory-table {
@@ -114,6 +122,33 @@
             color: white;
             padding: 1.5rem;
             border-radius: 12px;
+            height: 100%;
+        }
+
+        .offline-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--danger-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -152,6 +187,163 @@
             border-radius: 8px;
             padding: 0.5rem;
         }
+
+        .inventory-low {
+            background-color: #fffaf0;
+        }
+
+        .inventory-critical {
+            background-color: #fff5f5;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 50rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #feebc8;
+            color: #9c4221;
+        }
+
+        .status-processing {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status-shipped {
+            background-color: #c6f6d5;
+            color: #276749;
+        }
+
+        .status-delivered {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .status-cancelled {
+            background-color: #fed7d7;
+            color: #9b2c2c;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .data-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+        }
+
+        .inventory-actions {
+            margin-bottom: 1rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #6b7280;
+        }
+
+        .search-container input {
+            padding-left: 35px;
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .clickable-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge-online {
+            background-color: var(--success-color);
+        }
+
+        .badge-offline {
+            background-color: var(--danger-color);
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-online {
+            background-color: var(--success-color);
+        }
+
+        .dot-offline {
+            background-color: var(--danger-color);
+        }
+
+        .dot-syncing {
+            background-color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .nav-tabs .nav-link {
+            color: #4a5568;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .cursor-progress {
+            cursor: progress;
+        }
+
+        .cursor-wait {
+            cursor: wait;
+        }
     </style>
 </head>
 <body>
@@ -181,23 +373,34 @@
             <div class="container">
                 <a class="navbar-brand" href="#">
                     <i class="bi bi-box-seam"></i> FZ WMS
+                    <span class="connection-status ms-2">
+                        <span id="connectionDot" class="connection-dot dot-online"></span>
+                        <small id="connectionStatusText">En línea</small>
+                    </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link active" href="#dashboard">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#inventario">Inventario</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#comisiones">Comisiones</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#recogidas">Recogidas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#reportes">Reportes</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="#dashboard"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#inventario"><i class="bi bi-boxes me-1"></i> Inventario</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#pedidos"><i class="bi bi-clipboard-check me-1"></i> Pedidos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#recogidas"><i class="bi bi-truck me-1"></i> Recogidas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#comisiones"><i class="bi bi-cash-stack me-1"></i> Comisiones</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#reportes"><i class="bi bi-graph-up me-1"></i> Reportes</a></li>
                     </ul>
                     <div class="d-flex align-items-center">
-                        <span class="text-white me-3">Bienvenido, <span id="userName">Usuario</span></span>
-                        <button class="btn btn-outline-light" onclick="logout()">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i> <span id="userName">Usuario</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#configuracion"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,77 +410,151 @@
         <main class="container my-5">
             <!-- Sección Dashboard -->
             <section id="dashboard" class="mb-5">
-                <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshData()">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportDashboardData()">
+                            <i class="bi bi-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="row g-4">
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <h5 class="mb-0">Inventario Almacenado</h5>
-                            <h1 class="display-5 mb-0">1,250</h1>
-                            <small>Unidades</small>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-0">Inventario Almacenado</h5>
+                                    <h1 class="display-5 mb-0" id="inventoryCount">1,250</h1>
+                                    <small>Unidades</small>
+                                </div>
+                                <i class="bi bi-box-seam" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="mt-3">
+                                <small class="d-block"><span class="text-success">↑ 5.2%</span> vs mes anterior</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <h5 class="mb-0">Pedidos Activos</h5>
-                            <h1 class="display-5 mb-0">85</h1>
-                            <small>Este mes</small>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-0">Pedidos Activos</h5>
+                                    <h1 class="display-5 mb-0" id="activeOrders">85</h1>
+                                    <small>Este mes</small>
+                                </div>
+                                <i class="bi bi-clipboard-check" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="mt-3">
+                                <small class="d-block"><span class="text-success">↑ 12.7%</span> vs mes anterior</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <h5 class="mb-0">Tasa de Entrega</h5>
-                            <h1 class="display-5 mb-0">98.7%</h1>
-                            <small>En tiempo</small>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-0">Tasa de Entrega</h5>
+                                    <h1 class="display-5 mb-0" id="deliveryRate">98.7%</h1>
+                                    <small>En tiempo</small>
+                                </div>
+                                <i class="bi bi-check-circle" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="mt-3">
+                                <small class="d-block"><span class="text-success">↑ 1.3%</span> vs mes anterior</small>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
-                            <h5 class="mb-0">Comisiones</h5>
-                            <h1 class="display-5 mb-0">$12,450</h1>
-                            <small>Este mes</small>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-0">Comisiones</h5>
+                                    <h1 class="display-5 mb-0" id="monthlyCommissions">$12,450</h1>
+                                    <small>Este mes</small>
+                                </div>
+                                <i class="bi bi-cash-stack" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="mt-3">
+                                <small class="d-block"><span class="text-success">↑ 8.5%</span> vs mes anterior</small>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Calculadora de Comisiones -->
-            <section class="mb-5">
-                <div class="storage-calculator">
-                    <h4 class="mb-4"><i class="bi bi-calculator me-2"></i>Calculadora de Costos</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Peso (kg)</label>
-                            <input type="number" class="form-control" id="calcWeight" step="0.1" min="0.1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Dimensiones (cm)</label>
-                            <div class="package-dimensions">
-                                <input type="number" class="form-control" placeholder="Largo">
-                                <input type="number" class="form-control" placeholder="Ancho">
-                                <input type="number" class="form-control" placeholder="Alto">
+                <div class="row mt-4 g-4">
+                    <div class="col-md-8">
+                        <div class="dashboard-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Actividad Reciente</h5>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-secondary active">Hoy</button>
+                                    <button class="btn btn-outline-secondary">7 días</button>
+                                    <button class="btn btn-outline-secondary">30 días</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tipo de Producto</label>
-                            <select class="form-select">
-                                <option>Estándar</option>
-                                <option>Frágil</option>
-                                <option>Refrigerado</option>
-                                <option>Peligroso</option>
-                            </select>
+                            <div class="chart-container">
+                                <canvas id="activityChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <h5>Costos Estimados:</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <p class="mb-1">Almacenamiento: <span class="commission-badge">$15.000/mes</span></p>
+                    <div class="col-md-4">
+                        <div class="dashboard-card">
+                            <h5 class="mb-3">Distribución de Pedidos</h5>
+                            <div class="chart-container">
+                                <canvas id="ordersChart"></canvas>
                             </div>
-                            <div class="col-md-4">
-                                <p class="mb-1">Manipulación: <span class="commission-badge">$5.000/pedido</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-4">
+                    <div class="col-md-6">
+                        <div class="dashboard-card">
+                            <h5 class="mb-3">Últimos Pedidos</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Cliente</th>
+                                            <th>Estado</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrdersTable">
+                                        <!-- Se llena con JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="col-md-4">
-                                <p class="mb-1">Envío: <span class="commission-badge">$12.500</span></p>
+                            <div class="text-end mt-2">
+                                <a href="#pedidos" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="dashboard-card">
+                            <h5 class="mb-3">Inventario Crítico</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Producto</th>
+                                            <th>Stock</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="criticalInventoryTable">
+                                        <!-- Se llena con JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-end mt-2">
+                                <a href="#inventario" class="btn btn-sm btn-outline-primary">Ver inventario</a>
                             </div>
                         </div>
                     </div>
@@ -286,76 +563,205 @@
 
             <!-- Gestión de Inventario -->
             <section id="inventario" class="mb-5">
-                <h2 class="mb-4"><i class="bi bi-boxes me-2"></i>Gestión de Inventario</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-boxes me-2"></i>Gestión de Inventario</h2>
+                    <div>
+                        <button class="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                            <i class="bi bi-plus-lg"></i> Agregar Producto
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportInventory()">
+                            <i class="bi bi-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="search-container">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control" id="inventorySearch" placeholder="Buscar productos...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end">
+                            <div class="btn-group btn-group-sm me-2">
+                                <button class="btn btn-outline-secondary active">Todos</button>
+                                <button class="btn btn-outline-secondary">Bajo Stock</button>
+                                <button class="btn btn-outline-secondary">Crítico</button>
+                            </div>
+                            <select class="form-select form-select-sm" style="width: auto;">
+                                <option>Ordenar por: SKU</option>
+                                <option>Ordenar por: Nombre</option>
+                                <option>Ordenar por: Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="inventory-table">
-                    <table class="table table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>SKU</th>
-                                <th>Producto</th>
-                                <th>Stock</th>
-                                <th>Ubicación</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>FZ-1254</td>
-                                <td>Producto Ejemplo 1</td>
-                                <td>150</td>
-                                <td>Bodega A-25</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <!-- Más filas de inventario -->
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Ubicación</th>
+                                    <th>Valor Unitario</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Se llena con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-3">
+                        <div class="pagination-info">
+                            Mostrando <span id="inventoryStart">1</span> a <span id="inventoryEnd">10</span> de <span id="inventoryTotal">0</span> productos
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Pedidos -->
+            <section id="pedidos" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-clipboard-check me-2"></i>Gestión de Pedidos</h2>
+                    <div>
+                        <button class="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+                            <i class="bi bi-plus-lg"></i> Nuevo Pedido
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportOrders()">
+                            <i class="bi bi-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs mb-4" id="ordersTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-orders" type="button">Todos</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-orders" type="button">Pendientes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing-orders" type="button">En Proceso</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="shipped-tab" data-bs-toggle="tab" data-bs-target="#shipped-orders" type="button">Enviados</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered-orders" type="button">Entregados</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="ordersTabContent">
+                    <div class="tab-pane fade show active" id="all-orders" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allOrdersTable">
+                                    <!-- Se llena con JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Otras pestañas de pedidos -->
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3">
+                    <div class="pagination-info">
+                        Mostrando <span id="ordersStart">1</span> a <span id="ordersEnd">10</span> de <span id="ordersTotal">0</span> pedidos
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Anterior</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </section>
 
             <!-- Solicitud de Recogida -->
             <section id="recogidas" class="mb-5">
                 <div class="form-section">
-                    <h2 class="mb-4"><i class="bi bi-truck me-2"></i>Solicitud de Recogida</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="bi bi-truck me-2"></i>Solicitud de Recogida</h2>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="showPickupHistory()">
+                            <i class="bi bi-clock-history"></i> Historial
+                        </button>
+                    </div>
                     <form id="pickupForm">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Fecha de Recogida</label>
-                                <input type="date" class="form-control" required>
+                                <input type="date" class="form-control" id="pickupDate" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Hora Preferida</label>
-                                <input type="time" class="form-control" required>
+                                <input type="time" class="form-control" id="pickupTime" required>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Dirección de Recogida</label>
-                                <textarea class="form-control" rows="3" required></textarea>
+                                <textarea class="form-control" rows="3" id="pickupAddress" required></textarea>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Cantidad de Paquetes</label>
-                                <input type="number" class="form-control" min="1" required>
+                                <input type="number" class="form-control" id="pickupPackages" min="1" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Peso Total (kg)</label>
-                                <input type="number" class="form-control" step="0.1" required>
+                                <input type="number" class="form-control" id="pickupWeight" step="0.1" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Tipo de Embalaje</label>
-                                <select class="form-select" required>
+                                <select class="form-select" id="pickupPackaging" required>
+                                    <option value="">Seleccionar...</option>
                                     <option>Cajas Estándar</option>
                                     <option>Paletizado</option>
                                     <option>Contenedor</option>
+                                    <option>Bolsa</option>
+                                    <option>Otro</option>
                                 </select>
                             </div>
                             <div class="col-12">
+                                <label class="form-label">Instrucciones Especiales</label>
+                                <textarea class="form-control" rows="2" id="pickupInstructions"></textarea>
+                            </div>
+                            <div class="col-12">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" required>
+                                    <input class="form-check-input" type="checkbox" id="pickupTerms" required>
                                     <label class="form-check-label">Acepto los términos del servicio</label>
                                 </div>
                             </div>
@@ -372,7 +778,12 @@
             <!-- Estructura de Comisiones -->
             <section id="comisiones" class="mb-5">
                 <div class="form-section">
-                    <h2 class="mb-4"><i class="bi bi-cash-stack me-2"></i>Estructura de Comisiones</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="bi bi-cash-stack me-2"></i>Estructura de Comisiones</h2>
+                        <button class="btn btn-sm btn-outline-primary" onclick="calculateCommissions()">
+                            <i class="bi bi-calculator"></i> Calcular Comisiones
+                        </button>
+                    </div>
                     <div class="fee-structure-table">
                         <table class="table">
                             <thead class="table-light">
@@ -380,6 +791,7 @@
                                     <th>Servicio</th>
                                     <th>Descripción</th>
                                     <th>Costo</th>
+                                    <th>Comisión</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -387,62 +799,153 @@
                                     <td>Almacenamiento</td>
                                     <td>Costo mensual por m³</td>
                                     <td>$15.000/mes</td>
+                                    <td>10%</td>
                                 </tr>
                                 <tr>
                                     <td>Preparación de Pedido</td>
                                     <td>Por ítem procesado</td>
                                     <td>$2.500/ítem</td>
+                                    <td>15%</td>
                                 </tr>
                                 <tr>
                                     <td>Envío Estándar</td>
                                     <td>Por envío nacional</td>
                                     <td>$12.000 - $25.000</td>
+                                    <td>12%</td>
                                 </tr>
                                 <tr>
                                     <td>Manejo Especial</td>
                                     <td>Productos frágiles/peligrosos</td>
                                     <td>+30% costo base</td>
+                                    <td>8%</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="mt-5">
+                        <h4 class="mb-4"><i class="bi bi-graph-up me-2"></i>Historial de Comisiones</h4>
+                        <div class="chart-container">
+                            <canvas id="commissionsChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Seguimiento de Envíos -->
+            <!-- Reportes y Análisis -->
             <section id="reportes" class="mb-5">
                 <div class="form-section">
-                    <h2 class="mb-4"><i class="bi bi-geo-alt me-2"></i>Seguimiento de Envíos</h2>
-                    <div class="row g-4">
+                    <h2 class="mb-4"><i class="bi bi-graph-up me-2"></i>Reportes y Análisis</h2>
+                    
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Número de Guía">
-                                <button class="btn btn-primary">
-                                    <i class="bi bi-search"></i> Rastrear
-                                </button>
-                            </div>
-                            <div class="tracking-status status-active">
-                                <h5 class="mb-3">Estado Actual del Envío</h5>
-                                <div class="timeline">
-                                    <div class="timeline-item">
-                                        <h6>Recibido en Centro Logístico</h6>
-                                        <p class="text-muted small mb-0">15 Mar 2024 10:30 AM</p>
-                                    </div>
-                                    <div class="timeline-item">
-                                        <h6>En proceso de clasificación</h6>
-                                        <p class="text-muted small mb-0">16 Mar 2024 08:15 AM</p>
-                                    </div>
+                            <div class="card">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0">Generar Reporte</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="reportForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tipo de Reporte</label>
+                                            <select class="form-select" id="reportType" required>
+                                                <option value="">Seleccionar...</option>
+                                                <option>Inventario</option>
+                                                <option>Pedidos</option>
+                                                <option>Recogidas</option>
+                                                <option>Comisiones</option>
+                                                <option>Rendimiento</option>
+                                            </select>
+                                        </div>
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha Inicial</label>
+                                                <input type="date" class="form-control" id="reportStartDate" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha Final</label>
+                                                <input type="date" class="form-control" id="reportEndDate" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Formato</label>
+                                            <div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatPDF" value="PDF" checked>
+                                                    <label class="form-check-label" for="formatPDF">PDF</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatExcel" value="Excel">
+                                                    <label class="form-check-label" for="formatExcel">Excel</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="reportFormat" id="formatCSV" value="CSV">
+                                                    <label class="form-check-label" for="formatCSV">CSV</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-file-earmark-text"></i> Generar Reporte
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="alert alert-info">
-                                <h5><i class="bi bi-info-circle"></i> Instrucciones de Seguimiento</h5>
-                                <ul class="mb-0">
-                                    <li>Guarde siempre su número de seguimiento</li>
-                                    <li>Tiempo promedio de entrega: 2-5 días hábiles</li>
-                                    <li>Para urgencias contacte a soporte@fzwms.com</li>
-                                </ul>
+                            <div class="card h-100">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0">Análisis de Rendimiento</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="performanceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Reportes Guardados</h5>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha</th>
+                                            <th>Tamaño</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="savedReportsTable">
+                                        <tr>
+                                            <td>Reporte_Inventario_Marzo_2024</td>
+                                            <td>Inventario</td>
+                                            <td>01/04/2024</td>
+                                            <td>1.2 MB</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="bi bi-download"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-secondary me-1">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <!-- Más reportes -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -451,7 +954,7 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-dark text-white py-4">
+        <footer class="bg-dark text-white py-4 mt-auto">
             <div class="container text-center">
                 <div class="row">
                     <div class="col-md-4 mb-3">
@@ -476,33 +979,407 @@
         </footer>
     </div>
 
+    <!-- Modales -->
+    <div class="modal fade" id="addInventoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Agregar Producto al Inventario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addInventoryForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">SKU</label>
+                                <input type="text" class="form-control" id="inventorySKU" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Producto</label>
+                                <input type="text" class="form-control" id="inventoryName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" id="inventoryCategory" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Electrónicos</option>
+                                    <option>Ropa</option>
+                                    <option>Hogar</option>
+                                    <option>Alimentos</option>
+                                    <option>Belleza</option>
+                                    <option>Otros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="inventoryQuantity" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ubicación en Bodega</label>
+                                <input type="text" class="form-control" id="inventoryLocation" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Valor Unitario</label>
+                                <input type="number" class="form-control" id="inventoryValue" min="0" step="0.01" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" rows="2" id="inventoryDescription"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Peso (kg)</label>
+                                <input type="number" class="form-control" id="inventoryWeight" min="0.1" step="0.1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dimensiones (cm)</label>
+                                <div class="package-dimensions">
+                                    <input type="number" class="form-control" placeholder="Largo" id="inventoryLength">
+                                    <input type="number" class="form-control" placeholder="Ancho" id="inventoryWidth">
+                                    <input type="number" class="form-control" placeholder="Alto" id="inventoryHeight">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Proveedor</label>
+                                <input type="text" class="form-control" id="inventorySupplier">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Stock Mínimo</label>
+                                <input type="number" class="form-control" id="inventoryMinStock" min="1">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Imagen del Producto</label>
+                                <input type="file" class="form-control" id="inventoryImage" accept="image/*">
+                                <small class="text-muted">Formatos aceptados: JPG, PNG. Tamaño máximo: 2MB</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveInventoryItem()">Guardar Producto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear pedido -->
+    <div class="modal fade" id="createOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-clipboard-plus me-2"></i>Crear Nuevo Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createOrderForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente</label>
+                                <select class="form-select" id="orderClient" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Cliente 1</option>
+                                    <option>Cliente 2</option>
+                                    <option>Cliente 3</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de Entrega</label>
+                                <input type="date" class="form-control" id="orderDeliveryDate" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dirección de Entrega</label>
+                                <textarea class="form-control" rows="2" id="orderAddress" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <h6 class="mb-3">Productos</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="orderProductsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio</th>
+                                                <th>Total</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Se llena dinámicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductToOrder()">
+                                    <i class="bi bi-plus"></i> Agregar Producto
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Método de Envío</label>
+                                <select class="form-select" id="orderShippingMethod" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Estándar</option>
+                                    <option>Express</option>
+                                    <option>Prioritario</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Método de Pago</label>
+                                <select class="form-select" id="orderPaymentMethod" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option>Transferencia</option>
+                                    <option>Tarjeta Crédito</option>
+                                    <option>Contraentrega</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Notas</label>
+                                <textarea class="form-control" rows="2" id="orderNotes"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <div>
+                        <h5 class="mb-0">Total: <span id="orderTotalAmount">$0</span></h5>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="saveOrder()">Crear Pedido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle"></i> Éxito</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalSuccessMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de error -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-x-circle"></i> Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalErrorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-question-circle"></i> Confirmación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmAction">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container">
+        <div class="toast align-items-center text-white bg-success" role="alert" id="successToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span id="successToastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div class="toast align-items-center text-white bg-danger" role="alert" id="errorToast">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span id="errorToastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores de estado -->
+    <div class="offline-badge" id="offlineBadge">
+        <i class="bi bi-wifi-off"></i> Trabajando sin conexión
+    </div>
+    <div class="sync-status" id="syncStatus">
+        <i class="bi bi-arrow-repeat"></i> Sincronizando cambios...
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuración de credenciales válidas
-        const validCredentials = {
-            "accessKeys": [
-                "FZWMS-2024-ACCESS-KEY-1",
-                "FZWMS-2024-ACCESS-KEY-2",
-                "FZWMS-2024-ACCESS-KEY-3"
-            ],
-            "apiEndpoints": {
-                "inventory": "/api/inventory",
-                "pickups": "/api/pickups",
-                "tracking": "/api/tracking",
-                "reports": "/api/reports"
-            }
+        // Configuración inicial
+        const APP_NAME = "FZ WMS";
+        const APP_VERSION = "1.0.0";
+        const APP_DATA_KEY = "fzwms_app_data";
+        const ACCESS_KEYS = ["FZWMS-2024-KEY1", "FZWMS-2024-KEY2", "FZWMS-2024-KEY3"];
+        
+        // Endpoints API (usar Formspree y Workers)
+        const API_ENDPOINTS = {
+            inventory: "https://formspree.io/f/xqkrvezw",
+            orders: "https://formspree.io/f/xqkrvezw",
+            pickups: "https://formspree.io/f/xqkrvezw",
+            reports: "https://formspree.io/f/xqkrvezw",
+            sync: "https://fzwms-worker.your-domain.workers.dev/sync"
         };
+
+        // Datos iniciales de la aplicación
+        let appData = {
+            inventory: [],
+            orders: [],
+            pickups: [],
+            settings: {
+                lowStockThreshold: 10,
+                criticalStockThreshold: 5,
+                commissionRates: {
+                    storage: 0.10,
+                    handling: 0.15,
+                    shipping: 0.12,
+                    special: 0.08
+                }
+            },
+            lastSync: null,
+            offlineChanges: []
+        };
+
+        // Estado de la aplicación
+        let appState = {
+            isOnline: navigator.onLine,
+            isSyncing: false,
+            currentUser: null
+        };
+
+        // Inicialización de la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            setupEventListeners();
+            checkConnectionStatus();
+            
+            // Escuchar cambios en la conexión
+            window.addEventListener('online', handleConnectionChange);
+            window.addEventListener('offline', handleConnectionChange);
+        });
+
+        // Función para inicializar la aplicación
+        function initApp() {
+            // Cargar datos guardados localmente
+            const savedData = localStorage.getItem(APP_DATA_KEY);
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                console.log("Datos cargados desde localStorage");
+            } else {
+                // Datos de ejemplo para demostración
+                appData.inventory = [
+                    { sku: "FZ-1001", name: "Smartphone X", category: "Electrónicos", quantity: 45, location: "A-12", value: 1200000, weight: 0.2, minStock: 10 },
+                    { sku: "FZ-1002", name: "Laptop Pro", category: "Electrónicos", quantity: 18, location: "A-15", value: 2500000, weight: 1.5, minStock: 5 },
+                    { sku: "FZ-2001", name: "Camiseta Básica", category: "Ropa", quantity: 120, location: "B-03", value: 45000, weight: 0.3, minStock: 20 },
+                    { sku: "FZ-2002", name: "Jeans Clásico", category: "Ropa", quantity: 35, location: "B-05", value: 120000, weight: 0.5, minStock: 15 },
+                    { sku: "FZ-3001", name: "Set de Cocina", category: "Hogar", quantity: 22, location: "C-08", value: 180000, weight: 2.8, minStock: 8 },
+                    { sku: "FZ-4001", name: "Café Premium", category: "Alimentos", quantity: 65, location: "D-02", value: 35000, weight: 0.5, minStock: 30 },
+                    { sku: "FZ-5001", name: "Crema Hidratante", category: "Belleza", quantity: 8, location: "E-11", value: 55000, weight: 0.15, minStock: 10 },
+                    { sku: "FZ-6001", name: "Producto Variado", category: "Otros", quantity: 3, location: "F-09", value: 75000, weight: 0.7, minStock: 5 }
+                ];
+
+                appData.orders = [
+                    { id: "ORD-1001", client: "Cliente A", date: "2024-03-15", status: "Entregado", total: 1250000, items: [
+                        { sku: "FZ-1001", name: "Smartphone X", quantity: 1, price: 1200000 }
+                    ]},
+                    { id: "ORD-1002", client: "Cliente B", date: "2024-03-18", status: "Enviado", total: 3700000, items: [
+                        { sku: "FZ-1002", name: "Laptop Pro", quantity: 1, price: 2500000 },
+                        { sku: "FZ-2002", name: "Jeans Clásico", quantity: 2, price: 120000 }
+                    ]},
+                    { id: "ORD-1003", client: "Cliente C", date: "2024-03-20", status: "En Proceso", total: 225000, items: [
+                        { sku: "FZ-2001", name: "Camiseta Básica", quantity: 5, price: 45000 }
+                    ]},
+                    { id: "ORD-1004", client: "Cliente D", date: "2024-03-21", status: "Pendiente", total: 180000, items: [
+                        { sku: "FZ-3001", name: "Set de Cocina", quantity: 1, price: 180000 }
+                    ]}
+                ];
+
+                appData.pickups = [
+                    { id: "PICK-1001", date: "2024-03-10", time: "14:00", address: "Calle 123 #45-67", packages: 3, weight: 5.2, status: "Completado" },
+                    { id: "PICK-1002", date: "2024-03-15", time: "10:30", address: "Avenida 5 #22-10", packages: 1, weight: 0.8, status: "Completado" },
+                    { id: "PICK-1003", date: "2024-03-22", time: "16:00", address: "Carrera 7 #12-34", packages: 5, weight: 12.5, status: "Programado" }
+                ];
+
+                saveAppData();
+            }
+
+            // Verificar autenticación
+            const authToken = localStorage.getItem('authToken');
+            if (authToken && ACCESS_KEYS.includes(authToken)) {
+                document.getElementById('authSection').classList.add('d-none');
+                document.getElementById('mainContent').classList.remove('d-none');
+                appState.currentUser = authToken;
+                updateUI();
+            }
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Formulario de autenticación
+            document.getElementById('authForm').addEventListener('submit', handleAuth);
+            
+            // Formulario de recogida
+            document.getElementById('pickupForm').addEventListener('submit', handlePickupForm);
+            
+            // Formulario de reportes
+            document.getElementById('reportForm').addEventListener('submit', generateReport);
+            
+            // Búsqueda de inventario
+            document.getElementById('inventorySearch').addEventListener('input', filterInventory);
+            
+            // Configurar fecha mínima para recogidas (hoy)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pickupDate').min = today;
+            
+            // Configurar gráficos
+            setupCharts();
+        }
 
         // Sistema de Autenticación
         function handleAuth(e) {
             e.preventDefault();
             const accessKey = document.getElementById('accessKey').value;
             
-            if(validCredentials.accessKeys.includes(accessKey)) {
+            if(ACCESS_KEYS.includes(accessKey)) {
                 localStorage.setItem('authToken', accessKey);
                 document.getElementById('authSection').classList.add('d-none');
                 document.getElementById('mainContent').classList.remove('d-none');
+                appState.currentUser = accessKey;
+                updateUI();
+                showToast('success', 'Sesión iniciada correctamente');
             } else {
                 document.getElementById('authError').textContent = 'Clave de acceso inválida';
                 document.getElementById('authError').classList.remove('d-none');
@@ -514,135 +1391,758 @@
             window.location.reload();
         }
 
-        // Gestión de Formularios
-        async function handlePickupForm(e) {
+        // Manejo de conexión
+        function checkConnectionStatus() {
+            appState.isOnline = navigator.onLine;
+            updateConnectionUI();
+            
+            if (appState.isOnline) {
+                // Intentar sincronizar cambios pendientes
+                syncPendingChanges();
+            }
+        }
+
+        function handleConnectionChange() {
+            checkConnectionStatus();
+            
+            if (appState.isOnline) {
+                showToast('success', 'Conexión restablecida. Sincronizando datos...');
+            } else {
+                showToast('warning', 'Sin conexión. Trabajando en modo local.');
+            }
+        }
+
+        function updateConnectionUI() {
+            const connectionDot = document.getElementById('connectionDot');
+            const statusText = document.getElementById('connectionStatusText');
+            const offlineBadge = document.getElementById('offlineBadge');
+            
+            if (appState.isOnline) {
+                connectionDot.className = 'connection-dot dot-online';
+                statusText.textContent = 'En línea';
+                offlineBadge.style.display = 'none';
+            } else {
+                connectionDot.className = 'connection-dot dot-offline';
+                statusText.textContent = 'Sin conexión';
+                offlineBadge.style.display = 'block';
+            }
+            
+            if (appState.isSyncing) {
+                connectionDot.className = 'connection-dot dot-syncing';
+                statusText.textContent = 'Sincronizando...';
+            }
+        }
+
+        // Sincronización de datos
+        function syncPendingChanges() {
+            if (!appState.isOnline || appState.isSyncing || appData.offlineChanges.length === 0) return;
+            
+            appState.isSyncing = true;
+            updateConnectionUI();
+            document.getElementById('syncStatus').style.display = 'block';
+            
+            // Simular envío de cambios (en producción usaría fetch a los endpoints)
+            setTimeout(() => {
+                appData.offlineChanges = [];
+                appData.lastSync = new Date().toISOString();
+                saveAppData();
+                
+                appState.isSyncing = false;
+                updateConnectionUI();
+                document.getElementById('syncStatus').style.display = 'none';
+                
+                showToast('success', 'Datos sincronizados correctamente');
+                updateUI();
+            }, 2000);
+        }
+
+        // Guardar datos localmente
+        function saveAppData() {
+            localStorage.setItem(APP_DATA_KEY, JSON.stringify(appData));
+            console.log("Datos guardados en localStorage");
+        }
+
+        // Actualizar la interfaz de usuario
+        function updateUI() {
+            updateDashboard();
+            updateInventoryTable();
+            updateOrdersTable();
+            updateCriticalInventory();
+            updateRecentOrders();
+        }
+
+        // Actualizar el dashboard
+        function updateDashboard() {
+            // Contar inventario
+            const totalInventory = appData.inventory.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('inventoryCount').textContent = totalInventory.toLocaleString();
+            
+            // Contar pedidos activos
+            const activeOrders = appData.orders.filter(o => o.status !== 'Entregado' && o.status !== 'Cancelado').length;
+            document.getElementById('activeOrders').textContent = activeOrders;
+            
+            // Calcular tasa de entrega (simulada)
+            const deliveredOrders = appData.orders.filter(o => o.status === 'Entregado').length;
+            const totalOrders = appData.orders.length;
+            const deliveryRate = totalOrders > 0 ? (deliveredOrders / totalOrders * 100).toFixed(1) : 0;
+            document.getElementById('deliveryRate').textContent = `${deliveryRate}%`;
+            
+            // Calcular comisiones (simuladas)
+            const monthlyCommissions = appData.orders
+                .filter(o => o.date.startsWith('2024-03')) // Este mes
+                .reduce((sum, order) => sum + (order.total * 0.1), 0); // 10% de comisión
+            document.getElementById('monthlyCommissions').textContent = `$${Math.round(monthlyCommissions).toLocaleString()}`;
+            
+            // Actualizar gráficos
+            updateCharts();
+        }
+
+        // Actualizar tabla de inventario
+        function updateInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+            
+            appData.inventory.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de stock bajo/crítico
+                let rowClass = '';
+                if (item.minStock) {
+                    if (item.quantity <= appData.settings.criticalStockThreshold) {
+                        rowClass = 'inventory-critical';
+                    } else if (item.quantity <= appData.settings.lowStockThreshold) {
+                        rowClass = 'inventory-low';
+                    }
+                }
+                
+                row.className = rowClass;
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>${item.quantity} ${item.minStock ? `<small class="text-muted">/ ${item.minStock}</small>` : ''}</td>
+                    <td>${item.location}</td>
+                    <td>$${item.value.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editInventoryItem('${item.sku}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteInventory('${item.sku}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Actualizar información de paginación
+            document.getElementById('inventoryTotal').textContent = appData.inventory.length;
+        }
+
+        // Actualizar tabla de pedidos
+        function updateOrdersTable() {
+            const tbody = document.getElementById('allOrdersTable');
+            tbody.innerHTML = '';
+            
+            appData.orders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de estado
+                let statusClass = '';
+                let statusText = '';
+                switch(order.status) {
+                    case 'Pendiente':
+                        statusClass = 'status-pending';
+                        statusText = 'Pendiente';
+                        break;
+                    case 'En Proceso':
+                        statusClass = 'status-processing';
+                        statusText = 'En Proceso';
+                        break;
+                    case 'Enviado':
+                        statusClass = 'status-shipped';
+                        statusText = 'Enviado';
+                        break;
+                    case 'Entregado':
+                        statusClass = 'status-delivered';
+                        statusText = 'Entregado';
+                        break;
+                    case 'Cancelado':
+                        statusClass = 'status-cancelled';
+                        statusText = 'Cancelado';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.client}</td>
+                    <td>${formatDate(order.date)}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>$${order.total.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetails('${order.id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Actualizar información de paginación
+            document.getElementById('ordersTotal').textContent = appData.orders.length;
+        }
+
+        // Actualizar inventario crítico
+        function updateCriticalInventory() {
+            const tbody = document.getElementById('criticalInventoryTable');
+            tbody.innerHTML = '';
+            
+            const criticalItems = appData.inventory.filter(item => 
+                item.minStock && item.quantity <= appData.settings.criticalStockThreshold
+            ).slice(0, 5); // Mostrar solo los 5 más críticos
+            
+            if (criticalItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            No hay productos con stock crítico
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            criticalItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'inventory-critical';
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td>${item.quantity} <small class="text-muted">/ ${item.minStock}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="reorderInventory('${item.sku}')">
+                            <i class="bi bi-arrow-repeat"></i> Reabastecer
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Actualizar pedidos recientes
+        function updateRecentOrders() {
+            const tbody = document.getElementById('recentOrdersTable');
+            tbody.innerHTML = '';
+            
+            const recentOrders = [...appData.orders]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5); // Mostrar solo los 5 más recientes
+            
+            recentOrders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de estado
+                let statusClass = '';
+                let statusText = '';
+                switch(order.status) {
+                    case 'Pendiente':
+                        statusClass = 'status-pending';
+                        statusText = 'Pendiente';
+                        break;
+                    case 'En Proceso':
+                        statusClass = 'status-processing';
+                        statusText = 'En Proceso';
+                        break;
+                    case 'Enviado':
+                        statusClass = 'status-shipped';
+                        statusText = 'Enviado';
+                        break;
+                    case 'Entregado':
+                        statusClass = 'status-delivered';
+                        statusText = 'Entregado';
+                        break;
+                    case 'Cancelado':
+                        statusClass = 'status-cancelled';
+                        statusText = 'Cancelado';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.client}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>$${order.total.toLocaleString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Configurar gráficos
+        function setupCharts() {
+            // Gráfico de actividad
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            window.activityChart = new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Pedidos',
+                            data: [12, 19, 15, 20, 18, 25],
+                            borderColor: '#4299e1',
+                            backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Recogidas',
+                            data: [8, 12, 10, 15, 12, 18],
+                            borderColor: '#48bb78',
+                            backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de distribución de pedidos
+            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+            window.ordersChart = new Chart(ordersCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendientes', 'En Proceso', 'Enviados', 'Entregados', 'Cancelados'],
+                    datasets: [{
+                        data: [5, 8, 12, 25, 2],
+                        backgroundColor: [
+                            '#ecc94b',
+                            '#4299e1',
+                            '#667eea',
+                            '#48bb78',
+                            '#f56565'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de comisiones
+            const commissionsCtx = document.getElementById('commissionsChart').getContext('2d');
+            window.commissionsChart = new Chart(commissionsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Comisiones',
+                        data: [8500, 9200, 10200, 11500, 12450, 13500],
+                        backgroundColor: '#48bb78'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de rendimiento
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            window.performanceChart = new Chart(performanceCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Inventario', 'Pedidos', 'Entregas', 'Comisiones', 'Clientes'],
+                    datasets: [
+                        {
+                            label: 'Este Mes',
+                            data: [85, 90, 95, 88, 92],
+                            backgroundColor: 'rgba(66, 153, 225, 0.2)',
+                            borderColor: '#4299e1',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Mes Anterior',
+                            data: [78, 82, 88, 80, 85],
+                            backgroundColor: 'rgba(159, 122, 234, 0.2)',
+                            borderColor: '#9f7aea',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 50,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar gráficos con datos reales
+        function updateCharts() {
+            // Datos simulados para demostración
+            const deliveredOrders = appData.orders.filter(o => o.status === 'Entregado').length;
+            const processingOrders = appData.orders.filter(o => o.status === 'En Proceso').length;
+            const pendingOrders = appData.orders.filter(o => o.status === 'Pendiente').length;
+            const shippedOrders = appData.orders.filter(o => o.status === 'Enviado').length;
+            const cancelledOrders = appData.orders.filter(o => o.status === 'Cancelado').length;
+            
+            // Actualizar gráfico de distribución de pedidos
+            window.ordersChart.data.datasets[0].data = [
+                pendingOrders,
+                processingOrders,
+                shippedOrders,
+                deliveredOrders,
+                cancelledOrders
+            ];
+            window.ordersChart.update();
+            
+            // Actualizar gráfico de comisiones (simulado)
+            const monthlyCommissions = Math.round(appData.orders
+                .filter(o => o.date.startsWith('2024-03')) // Este mes
+                .reduce((sum, order) => sum + (order.total * 0.1), 0); // 10% de comisión
+            
+            window.commissionsChart.data.datasets[0].data = [8500, 9200, monthlyCommissions, 11500, 12450, 13500];
+            window.commissionsChart.update();
+        }
+
+        // Manejo de formulario de recogida
+        function handlePickupForm(e) {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const data = {
-                fecha: formData.get('fecha'),
-                hora: formData.get('hora'),
-                direccion: formData.get('direccion'),
-                paquetes: formData.get('paquetes'),
-                peso: formData.get('peso'),
-                embalaje: formData.get('embalaje')
+            const pickupData = {
+                id: `PICK-${Math.floor(1000 + Math.random() * 9000)}`,
+                date: document.getElementById('pickupDate').value,
+                time: document.getElementById('pickupTime').value,
+                address: document.getElementById('pickupAddress').value,
+                packages: parseInt(document.getElementById('pickupPackages').value),
+                weight: parseFloat(document.getElementById('pickupWeight').value),
+                packaging: document.getElementById('pickupPackaging').value,
+                instructions: document.getElementById('pickupInstructions').value,
+                status: 'Programado',
+                createdAt: new Date().toISOString()
             };
-
-            try {
-                const response = await fetch(validCredentials.apiEndpoints.pickups, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                    },
-                    body: JSON.stringify(data)
+            
+            // Agregar a los datos locales
+            appData.pickups.push(pickupData);
+            
+            if (appState.isOnline) {
+                // Enviar a la API (simulado)
+                sendPickupRequest(pickupData)
+                    .then(() => {
+                        saveAppData();
+                        showToast('success', 'Recogida programada exitosamente');
+                        e.target.reset();
+                    })
+                    .catch(error => {
+                        console.error('Error al enviar recogida:', error);
+                        showToast('error', 'Error al programar recogida. Los datos se guardaron localmente.');
+                    });
+            } else {
+                // Guardar como cambio pendiente
+                appData.offlineChanges.push({
+                    type: 'pickup',
+                    data: pickupData,
+                    timestamp: new Date().toISOString()
                 });
-
-                if (response.ok) {
-                    showSuccessModal('Recogida programada exitosamente');
-                    e.target.reset();
-                } else {
-                    throw new Error('Error en el envío de datos');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showErrorModal('Error al programar la recogida');
+                saveAppData();
+                showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
+                e.target.reset();
             }
         }
 
-        // Modales
-        function showSuccessModal(message) {
-            const modal = new bootstrap.Modal(document.getElementById('successModal'));
-            document.getElementById('modalSuccessMessage').textContent = message;
-            modal.show();
-        }
-
-        function showErrorModal(message) {
-            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
-            document.getElementById('modalErrorMessage').textContent = message;
-            modal.show();
-        }
-
-        // Event Listeners
-        document.getElementById('authForm').addEventListener('submit', handleAuth);
-        document.getElementById('pickupForm').addEventListener('submit', handlePickupForm);
-
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', () => {
-            const authToken = localStorage.getItem('authToken');
-            if (authToken && validCredentials.accessKeys.includes(authToken)) {
-                document.getElementById('authSection').classList.add('d-none');
-                document.getElementById('mainContent').classList.remove('d-none');
-            }
-        });
-
-        // Cálculos en Tiempo Real
-        document.querySelectorAll('#calcWeight, .package-dimensions input').forEach(input => {
-            input.addEventListener('input', () => {
-                // Lógica de cálculo de costos
-                const weight = parseFloat(document.getElementById('calcWeight').value) || 0;
-                const storageCost = weight * 15000;
-                const handlingCost = weight * 2500;
-                
-                document.querySelectorAll('.commission-badge')[0].textContent = `$${storageCost.toLocaleString()}/mes`;
-                document.querySelectorAll('.commission-badge')[1].textContent = `$${handlingCost.toLocaleString()}/pedido`;
+        // Función simulada para enviar recogida a la API
+        function sendPickupRequest(data) {
+            return new Promise((resolve, reject) => {
+                // Simular llamada a API con Formspree
+                setTimeout(() => {
+                    // En producción, usaría fetch a API_ENDPOINTS.pickups
+                    console.log('Recogida enviada a la API:', data);
+                    resolve();
+                }, 1000);
             });
-        });
-
-        // Sistema de Rastreo
-        async function trackShipment(trackingNumber) {
-            try {
-                const response = await fetch(`${validCredentials.apiEndpoints.tracking}/${trackingNumber}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                    }
-                });
-                const data = await response.json();
-                updateTrackingUI(data);
-            } catch (error) {
-                console.error('Error:', error);
-                showErrorModal('Error al rastrear el envío');
-            }
         }
 
-        function updateTrackingUI(data) {
-            const timeline = document.querySelector('.timeline');
-            timeline.innerHTML = data.estados.map(estado => `
-                <div class="timeline-item">
-                    <h6>${estado.estado}</h6>
-                    <p class="text-muted small mb-0">${new Date(estado.fecha).toLocaleString()}</p>
-                </div>
-            `).join('');
+        // Generar reporte
+        function generateReport(e) {
+            e.preventDefault();
+            
+            const reportType = document.getElementById('reportType').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const format = document.querySelector('input[name="reportFormat"]:checked').value;
+            
+            // Validar fechas
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('error', 'La fecha final debe ser posterior a la fecha inicial');
+                return;
+            }
+            
+            // Simular generación de reporte
+            showToast('success', `Generando reporte de ${reportType} en formato ${format}...`);
+            
+            // En producción, esto generaría y descargaría el reporte
+            setTimeout(() => {
+                showModal('success', `Reporte de ${reportType} generado exitosamente. Se ha enviado a su correo.`);
+            }, 2000);
+        }
+
+        // Filtrar inventario
+        function filterInventory() {
+            const searchTerm = document.getElementById('inventorySearch').value.toLowerCase();
+            const rows = document.getElementById('inventoryTableBody').querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        // Funciones para inventario
+        function saveInventoryItem() {
+            const newItem = {
+                sku: document.getElementById('inventorySKU').value,
+                name: document.getElementById('inventoryName').value,
+                category: document.getElementById('inventoryCategory').value,
+                quantity: parseInt(document.getElementById('inventoryQuantity').value),
+                location: document.getElementById('inventoryLocation').value,
+                value: parseFloat(document.getElementById('inventoryValue').value),
+                weight: parseFloat(document.getElementById('inventoryWeight').value) || 0,
+                minStock: parseInt(document.getElementById('inventoryMinStock').value) || 0,
+                description: document.getElementById('inventoryDescription').value,
+                supplier: document.getElementById('inventorySupplier').value,
+                dimensions: {
+                    length: parseFloat(document.getElementById('inventoryLength').value) || 0,
+                    width: parseFloat(document.getElementById('inventoryWidth').value) || 0,
+                    height: parseFloat(document.getElementById('inventoryHeight').value) || 0
+                }
+            };
+            
+            // Verificar si es edición o nuevo
+            const existingIndex = appData.inventory.findIndex(item => item.sku === newItem.sku);
+            
+            if (existingIndex >= 0) {
+                // Edición
+                appData.inventory[existingIndex] = newItem;
+            } else {
+                // Nuevo item
+                appData.inventory.push(newItem);
+            }
+            
+            saveAppData();
+            updateUI();
+            
+            // Cerrar modal y mostrar confirmación
+            bootstrap.Modal.getInstance(document.getElementById('addInventoryModal')).hide();
+            showToast('success', `Producto ${existingIndex >= 0 ? 'actualizado' : 'agregado'} correctamente`);
+        }
+
+        function editInventoryItem(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            // Llenar formulario con datos del item
+            document.getElementById('inventorySKU').value = item.sku;
+            document.getElementById('inventoryName').value = item.name;
+            document.getElementById('inventoryCategory').value = item.category;
+            document.getElementById('inventoryQuantity').value = item.quantity;
+            document.getElementById('inventoryLocation').value = item.location;
+            document.getElementById('inventoryValue').value = item.value;
+            document.getElementById('inventoryWeight').value = item.weight || '';
+            document.getElementById('inventoryMinStock').value = item.minStock || '';
+            document.getElementById('inventoryDescription').value = item.description || '';
+            document.getElementById('inventorySupplier').value = item.supplier || '';
+            
+            if (item.dimensions) {
+                document.getElementById('inventoryLength').value = item.dimensions.length || '';
+                document.getElementById('inventoryWidth').value = item.dimensions.width || '';
+                document.getElementById('inventoryHeight').value = item.dimensions.height || '';
+            }
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('addInventoryModal'));
+            modal.show();
+        }
+
+        function confirmDeleteInventory(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            document.getElementById('confirmMessage').textContent = `¿Está seguro que desea eliminar el producto ${item.name} (${item.sku})?`;
+            
+            const confirmBtn = document.getElementById('confirmAction');
+            confirmBtn.onclick = function() {
+                deleteInventoryItem(sku);
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            };
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        function deleteInventoryItem(sku) {
+            appData.inventory = appData.inventory.filter(item => item.sku !== sku);
+            saveAppData();
+            updateUI();
+            showToast('success', 'Producto eliminado correctamente');
+        }
+
+        function reorderInventory(sku) {
+            const item = appData.inventory.find(i => i.sku === sku);
+            if (!item) return;
+            
+            // Simular reabastecimiento
+            const newQuantity = item.quantity + item.minStock * 2;
+            
+            // Actualizar cantidad
+            item.quantity = newQuantity;
+            saveAppData();
+            updateUI();
+            
+            showToast('success', `Producto ${item.name} reabastecido. Nuevo stock: ${newQuantity}`);
+        }
+
+        // Funciones para pedidos
+        function viewOrderDetails(orderId) {
+            const order = appData.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            // En una aplicación real, mostraría un modal con todos los detalles
+            showModal('success', `Detalles del pedido ${orderId}\nCliente: ${order.client}\nTotal: $${order.total.toLocaleString()}\nEstado: ${order.status}`);
+        }
+
+        function addProductToOrder() {
+            // En una aplicación real, mostraría un modal para seleccionar productos del inventario
+            showToast('info', 'Funcionalidad de agregar producto en desarrollo');
+        }
+
+        function saveOrder() {
+            // En una aplicación real, implementaría la lógica para guardar pedidos
+            showToast('info', 'Funcionalidad de guardar pedido en desarrollo');
+        }
+
+        // Funciones de utilidad
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        function showToast(type, message) {
+            const toastEl = type === 'success' ? document.getElementById('successToast') : document.getElementById('errorToast');
+            const toastMessage = type === 'success' ? document.getElementById('successToastMessage') : document.getElementById('errorToastMessage');
+            
+            toastMessage.textContent = message;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        function showModal(type, message) {
+            const modalEl = document.getElementById(type === 'success' ? 'successModal' : 'errorModal');
+            const messageEl = document.getElementById(type === 'success' ? 'modalSuccessMessage' : 'modalErrorMessage');
+            
+            messageEl.textContent = message;
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        function refreshData() {
+            // Simular recarga de datos
+            document.body.classList.add('cursor-wait');
+            
+            setTimeout(() => {
+                document.body.classList.remove('cursor-wait');
+                updateUI();
+                showToast('success', 'Datos actualizados correctamente');
+            }, 1000);
+        }
+
+        function exportDashboardData() {
+            // Simular exportación
+            showToast('success', 'Exportando datos del dashboard...');
+            
+            setTimeout(() => {
+                showModal('success', 'Datos exportados correctamente. Se ha descargado el archivo.');
+            }, 1500);
+        }
+
+        function exportInventory() {
+            // Simular exportación
+            showToast('success', 'Exportando inventario...');
+            
+            setTimeout(() => {
+                showModal('success', 'Inventario exportado correctamente. Se ha descargado el archivo CSV.');
+            }, 1500);
+        }
+
+        function exportOrders() {
+            // Simular exportación
+            showToast('success', 'Exportando pedidos...');
+            
+            setTimeout(() => {
+                showModal('success', 'Pedidos exportados correctamente. Se ha descargado el archivo Excel.');
+            }, 1500);
+        }
+
+        function showPickupHistory() {
+            // Simular mostrar historial
+            showModal('success', 'Historial de recogidas:\n\n' + 
+                appData.pickups.map(p => `${p.id} - ${p.date} ${p.time} - ${p.status}`).join('\n'));
+        }
+
+        function calculateCommissions() {
+            // Simular cálculo de comisiones
+            showModal('success', 'Comisiones calculadas:\n\n' +
+                `Total comisiones este mes: $${Math.round(appData.orders
+                    .filter(o => o.date.startsWith('2024-03')) // Este mes
+                    .reduce((sum, order) => sum + (order.total * 0.1), 0)).toLocaleString()}`);
         }
     </script>
-
-    <!-- Modales -->
-    <div class="modal fade" id="successModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title"><i class="bi bi-check-circle"></i> Éxito</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalSuccessMessage"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="errorModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title"><i class="bi bi-x-circle"></i> Error</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalErrorMessage"></p>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
