@@ -3,258 +3,828 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Privado Nostr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/nostr-tools@1.0.0/lib/nostr.bundle.js"></script>
+    <title>Acceso - FZ2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .login-container {
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
+            background-color: white;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            background-color: white;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
         }
-        .hidden {
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-logo h2 {
+            font-weight: 700;
+            color: #212529;
+        }
+        .form-control {
+            height: 45px;
+            border-radius: 5px;
+        }
+        .btn-login {
+            background-color: #212529;
+            color: white;
+            border: none;
+            height: 45px;
+            border-radius: 5px;
+            font-weight: 600;
+            width: 100%;
+        }
+        .btn-login:hover {
+            background-color: #343a40;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
             display: none;
-        }
-        .nsec {
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-        .alert-fixed {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            width: 300px;
         }
     </style>
 </head>
 <body>
-    <!-- Alertas flotantes -->
-    <div id="alert-container" class="alert-fixed"></div>
-
-    <!-- Página de Login -->
-    <div id="login-page">
-        <div class="container">
-            <div class="login-container">
-                <h2 class="text-center mb-4">Acceso Privado</h2>
-                <p class="text-center text-muted mb-4">Solo para usuarios autorizados</p>
-                <form id="login-form">
-                    <div class="mb-3">
-                        <label for="private-key" class="form-label">Clave Privada (nsec)</label>
-                        <textarea class="form-control nsec" id="private-key" rows="5" placeholder="Pega tu clave nsec aquí" required></textarea>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Verificar Acceso</button>
-                    </div>
-                </form>
-                <div id="login-error" class="alert alert-danger mt-3 hidden"></div>
-            </div>
+    <div class="login-container">
+        <div class="login-logo">
+            <h2>FZ2</h2>
+            <p>Ingresa la clave de acceso</p>
         </div>
+        <form id="loginForm">
+            <div class="mb-3">
+                <input type="password" class="form-control" id="accessKey" placeholder="Clave de acceso" required>
+                <div id="keyError" class="error-message">Clave incorrecta. Intenta de nuevo.</div>
+            </div>
+            <button type="submit" class="btn btn-login">Acceder</button>
+        </form>
     </div>
 
-    <!-- Página Principal -->
-    <div id="main-page" class="hidden">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#!">Contenido Exclusivo</a>
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="#" id="logout-link">Cerrar Sesión</a>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-10">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Bienvenido usuario autorizado</h3>
-                        </div>
-                        <div class="card-body">
-                            <h4 class="mb-4">Información confidencial</h4>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card mb-4">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Documento 1</h5>
-                                            <p class="card-text">Contenido exclusivo para miembros autorizados con acceso Nostr.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card mb-4">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Documento 2</h5>
-                                            <p class="card-text">Información clasificada disponible solo para tu clave pública.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <button id="show-npub" class="btn btn-outline-secondary">Mostrar mi identidad Nostr</button>
-                                <div id="npub-display" class="mt-3 nsec hidden"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Base de datos de claves autorizadas (en formato nsec)
-        const authorizedKeys = {
-            "users": [
-                {
-                    "name": "Usuario VIP 1",
-                    "nsec": "nsec1vl029mgpspedva04g90vltkh6fvh240zqtv9k0t9af8935ke9laqsnlfe5",
-                    "npub": "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg",
-                    "access": "full"
-                },
-                {
-                    "name": "Usuario Premium",
-                    "nsec": "nsec1j4c6y8gt9e3e0k4na2x5k6d9f7g2v3j5h7k8m9n0s1w2e3r4t5y6u7i8o9",
-                    "npub": "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95g8",
-                    "access": "premium"
-                }
-            ]
+        // Configuración de autenticación
+        const authConfig = {
+            validKey: "FZ2clave2024", // Cambia esta clave por la que desees usar
+            sessionKey: "fz2Authenticated",
+            sessionExpiry: 12 // Horas de validez de la sesión
         };
 
-        // Elementos del DOM
-        const loginPage = document.getElementById('login-page');
-        const mainPage = document.getElementById('main-page');
-        const loginForm = document.getElementById('login-form');
-        const privateKeyInput = document.getElementById('private-key');
-        const loginError = document.getElementById('login-error');
-        const logoutLink = document.getElementById('logout-link');
-        const showNpubBtn = document.getElementById('show-npub');
-        const npubDisplay = document.getElementById('npub-display');
-        const alertContainer = document.getElementById('alert-container');
+        // Verificar autenticación al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
 
-        // Usuario actual
-        let currentUser = null;
-
-        // Mostrar alerta flotante
-        function showAlert(message, type = 'success') {
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show`;
-            alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            alertContainer.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.remove();
-            }, 5000);
-        }
-
-        // Validar clave Nostr
-        function validateNostrKey(nsec) {
-            try {
-                // Decodificar la clave nsec
-                const { type, data } = nostr.nip19.decode(nsec);
-                if (type !== 'nsec') return false;
-                
-                // Obtener la clave pública
-                const pk = nostr.getPublicKey(data);
-                const npub = nostr.nip19.npubEncode(pk);
-                
-                // Verificar si está en la lista de autorizados
-                const authorizedUser = authorizedKeys.users.find(user => user.nsec === nsec);
-                
-                if (!authorizedUser) return false;
-                
-                return {
-                    ...authorizedUser,
-                    sk: data,
-                    pk: pk
-                };
-            } catch (e) {
-                console.error("Error validando clave:", e);
-                return false;
-            }
-        }
-
-        // Mostrar página de login
-        function showLoginPage() {
-            loginPage.classList.remove('hidden');
-            mainPage.classList.add('hidden');
-            privateKeyInput.value = '';
-        }
-
-        // Mostrar contenido principal
-        function showMainPage() {
-            loginPage.classList.add('hidden');
-            mainPage.classList.remove('hidden');
-            showAlert(`Bienvenido ${currentUser.name}`, 'success');
-        }
-
-        // Manejar login
-        loginForm.addEventListener('submit', (e) => {
+        // Manejar el formulario de login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const nsec = privateKeyInput.value.trim();
+            const enteredKey = document.getElementById('accessKey').value.trim();
             
-            if (!nsec) {
-                loginError.textContent = 'Por favor ingresa tu clave privada';
-                loginError.classList.remove('hidden');
+            if (enteredKey === authConfig.validKey) {
+                // Crear sesión
+                const sessionData = {
+                    authenticated: true,
+                    expiry: new Date().getTime() + (authConfig.sessionExpiry * 60 * 60 * 1000)
+                };
+                localStorage.setItem(authConfig.sessionKey, JSON.stringify(sessionData));
+                window.location.href = "index.html"; // Redirigir al index principal
+            } else {
+                document.getElementById('keyError').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('keyError').style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        // Función para verificar autenticación
+        function checkAuthentication() {
+            const sessionData = JSON.parse(localStorage.getItem(authConfig.sessionKey));
+            
+            // Si estamos en la página de login y ya está autenticado, redirigir
+            if (window.location.pathname.endsWith('index.html') {
+                if (sessionData && sessionData.authenticated && new Date().getTime() < sessionData.expiry) {
+                    // Mostrar el contenido real de la página
+                    document.body.innerHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FZ2 - Tienda Completa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: 700;
+        }
+        .hero-section {
+            background-color: #212529;
+            color: white;
+            padding: 4rem 0;
+        }
+        .product-card {
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .quantity-controls button {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checkout-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .payment-instructions {
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .cop-details {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .loading-spinner {
+            display: none;
+            width: 3rem;
+            height: 3rem;
+            margin: 20px auto;
+        }
+        #qrCode {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .badge-sale {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+        }
+        .inventory-badge {
+            font-size: 0.75rem;
+        }
+        .footer-link {
+            color: #ffffff;
+            text-decoration: none;
+            Pr: none;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+            color: #adb5bd;
+        }
+        #addressField {
+            display: none;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .bank-method {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">FZ2</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" href="https://www.facebook.com/share/g/1LeZfR3zJ2/">Facebook</a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://chat.whatsapp.com/CMo21XbfE5hGFNzPl3wgMN">Whatsapp</a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://www.google.com/maps?q=3.441764,-76.528070&ll=3.441764,-76.528070&z=15">Dirección</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tel:+573215296581">Celular</a></li>
+                    <li class="nav-item"><a class="nav-link" href="politicas.html">Políticas</a></li>
+                </ul>
+                <div class="d-flex">
+                    <button class="btn btn-outline-dark position-relative" onclick="showOrderModal()">
+                        <i class="bi bi-cart-fill"></i>
+                        <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">9Guarapo</h1>
+            <p class="lead">Los mejores productos al mejor precio</p>
+        </div>
+    </header>
+
+    <section class="py-3 bg-light">
+        <div class="container">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar productos..." oninput="searchProducts()">
+                <button class="btn btn-dark" type="button"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4" id="productsContainer"></div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tu Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="orderSummary"></div>
+                    
+                    <div id="checkoutFormSection">
+                        <div class="checkout-section">
+                            <h5>Método de Entrega</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="deliveryMethod" id="pickup" value="pickup" checked>
+                                <label class="form-check-label" for="pickup">Recoger en tienda</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="deliveryMethod" id="delivery" value="delivery">
+                                <label class="form-check-label" for="delivery">Envío a domicilio (+$5,000)</label>
+                            </div>
+                            
+                            <form id="customerForm" class="mt-3" novalidate>
+                                <div class="mb-3">
+                                    <label for="customerName" class="form-label">Nombre completo*</label>
+                                    <input type="text" class="form-control" id="customerName" required minlength="3" pattern="[A-Za-z\s]+" title="El nombre solo debe contener letras y espacios">
+                                    <div class="invalid-feedback">Por favor ingresa un nombre válido (mínimo 3 caracteres, solo letras y espacios).</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="customerPhone" class="form-label">Teléfono*</label>
+                                    <input type="tel" class="form-control" id="customerPhone" required pattern="[0-9]{10}" title="El teléfono debe tener 10 dígitos">
+                                    <div class="invalid-feedback">Por favor ingresa un número de teléfono válido (10 dígitos).</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="customerEmail" class="form-label">Correo electrónico*</label>
+                                    <input type="email" class="form-control" id="customerEmail" required>
+                                    <div class="invalid-feedback">Por favor ingresa un correo electrónico válido.</div>
+                                </div>
+                                <div class="mb-3" id="addressField" style="display: none;">
+                                    <label for="customerAddress" class="form-label">Dirección completa*</label>
+                                    <input type="text" class="form-control" id="customerAddress" minlength="10" title="La dirección debe tener al menos 10 caracteres">
+                                    <div class="invalid-feedback">Por favor ingresa una dirección válida (mínimo 10 caracteres).</div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                                    <button type="button" class="btn btn-primary me-md-2" onclick="processPayment('COP')">
+                                        <i class="bi bi-cash-coin"></i> Pagar con COP
+                                    </button>
+                                    <button type="button" class="btn btn-warning" onclick="processPayment('Bitcoin')">
+                                        <i class="bi bi-currency-bitcoin"></i> Pagar con Bitcoin
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <div id="loadingSpinner" class="spinner-border text-primary loading-spinner" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="copPaymentSection" class="cop-details" style="display: none;">
+                        <h4><i class="bi bi-cash-coin"></i> Pago en Pesos Colombianos</h4>
+                        <p>✅ Total a pagar: <strong id="copTotalAmount"></strong></p>
+                        <p>📝 Número de pedido: <strong id="copOrderNumber"></strong></p>
+                        
+                        <div class="bank-method">
+                            <h5><i class="bi bi-bank"></i> Transferencia Bancolombia</h5>
+                            <p><strong>Cuenta:</strong> 1234567890</p>
+                            <p><strong>Titular:</strong> Nombre del Titular</p>
+                            <p><strong>Tipo:</strong> Ahorros</p>
+                        </div>
+                        
+                        <div class="bank-method">
+                            <h5><i class="bi bi-phone"></i> Nequi</h5>
+                            <p><strong>Número:</strong> 3123456789</p>
+                            <p><strong>Titular:</strong> Nombre del Titular</p>
+                        </div>
+                        
+                        <div class="bank-method">
+                            <h5><i class="bi bi-wallet"></i> DaviPlata</h5>
+                            <p><strong>Número:</strong> 3123456789</p>
+                            <p><strong>Titular:</strong> Nombre del Titular</p>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <p>💰 Por favor envía el monto exacto</p>
+                            <p>📦 Envía el comprobante por WhatsApp al <strong>3123456789</strong> con tu número de pedido</p>
+                        </div>
+                        
+                        <div class="d-grid mt-3">
+                            <button class="btn btn-success" onclick="completeOrder()">
+                                <i class="bi bi-check-circle"></i> Confirmar pago
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="bitcoinPaymentSection" class="payment-instructions" style="display: none;">
+                        <h4><i class="bi bi-currency-bitcoin"></i> Pago con Bitcoin</h4>
+                        <p>✅ Total a pagar: <strong id="bitcoinTotalAmount"></strong></p>
+                        <p>🔗 Dirección Bitcoin: <strong>1CAW26tepzcozWR58tMmSq5Sx44RCBtLXL</strong></p>
+                        <p>📝 Número de pedido: <strong id="bitcoinOrderNumber"></strong></p>
+                        
+                        <div id="qrCode" class="mb-3"></div>
+                        
+                        <div class="alert alert-warning">
+                            <p>⚠️ El cliente asume las comisiones de red</p>
+                            <p>📌 Incluye el número de pedido en el memo de la transacción</p>
+                        </div>
+                        
+                        <div class="d-grid mt-3">
+                            <button class="btn btn-success" onclick="completeOrder()">
+                                <i class="bi bi-check-circle"></i> Confirmar pago
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                        <h5><i class="bi bi-check-circle-fill"></i> ¡Pedido confirmado!</h5>
+                        <p>Tu pedido <strong id="confirmedOrderNumber"></strong> ha sido recibido.</p>
+                        <p>Nos comunicaremos contigo para confirmar el pago.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-1">FZ2 - Contraentregaco FZ</p>
+            <p class="mb-1" id="caliDateTime">Cali, Colombia: <span id="currentDateTime"></span></p>
+            <p class="mb-0"><a href="politicas.html" class="footer-link">Políticas de la empresa</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    
+    <script>
+        // Configuración
+        const BITCOIN_ADDRESS = "1CAW26tepzcozWR58tMmSq5Sx44RCBtLXL";
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xyzererb";
+        const CLOUDFLARE_WORKER = "https://fz1.fz1-27c.workers.dev/";
+        const DELIVERY_FEE = 5000;
+
+        // Datos de productos
+        const products = [
+            {
+                id: 1,
+                name: "1",
+                price: 120000,
+                inventory: 15,
+                image: "1/1.jpg",
+                description: "Producto de alta calidad con garantía de 1 año.",
+                onSale: true
+            },
+            {
+                id: 2,
+                name: "Producto Estándar",
+                price: 80000,
+                inventory: 30,
+                image: "https://via.placeholder.com/300",
+                description: "Producto confiable para uso diario.",
+                onSale: false
+            },
+            {
+                id: 3,
+                name: "Producto Económico",
+                price: 50000,
+                inventory: 50,
+                image: "https://via.placeholder.com/300",
+                description: "Solución económica sin perder calidad.",
+                onSale: true
+            },
+            {
+                id: 4,
+                name: "Producto Deluxe",
+                price: 150000,
+                inventory: 10,
+                image: "https://via.placeholder.com/300",
+                description: "Edición especial con características exclusivas.",
+                onSale: false
+            }
+        ];
+
+        // Variables globales
+        let cart = {};
+        let currentOrderId = "";
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('addressField').style.display = 
+                        this.value === 'delivery' ? 'block' : 'none';
+                    updateOrderSummary();
+                });
+            });
+        });
+
+        // Actualizar fecha y hora
+        function updateDateTime() {
+            const options = {
+                timeZone: 'America/Bogota',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            document.getElementById('currentDateTime').textContent = 
+                new Date().toLocaleString('es-CO', options);
+        }
+
+        // Renderizar productos
+        function renderProducts(productsToShow = products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = productsToShow.map(product => `
+                <div class="col-md-4 col-lg-3">
+                    <div class="card product-card h-100">
+                        ${product.onSale ? '<span class="badge bg-danger badge-sale">SALE</span>' : ''}
+                        <img src="${product.image}" class="card-img-top p-3" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text text-muted small">${product.description}</p>
+                            <p class="fw-bold">$${product.price.toLocaleString()}</p>
+                            <div class="quantity-controls">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="adjustQuantity(${product.id}, -1)">-</button>
+                                <span id="quantity-${product.id}">${cart[product.id] || 0}</span>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="adjustQuantity(${product.id}, 1)">+</button>
+                            </div>
+                            <span class="badge bg-secondary inventory-badge mt-2">Disponibles: ${product.inventory}</span>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-sm btn-dark w-100" onclick="addToCart(${product.id})">
+                                Añadir al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Funciones del carrito
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product || (cart[productId] || 0) >= product.inventory) {
+                return alert('No hay suficiente inventario');
+            }
+            cart[productId] = (cart[productId] || 0) + 1;
+            updateCartCounter();
+            document.getElementById(`quantity-${productId}`).textContent = cart[productId];
+        }
+
+        function adjustQuantity(productId, change) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const currentQuantity = cart[productId] || 0;
+            let newQuantity = currentQuantity + change;
+            
+            newQuantity = Math.max(0, Math.min(newQuantity, product.inventory));
+            
+            if (newQuantity === 0) {
+                delete cart[productId];
+            } else {
+                cart[productId] = newQuantity;
+            }
+            
+            document.getElementById(`quantity-${productId}`).textContent = cart[productId] || 0;
+            updateCartCounter();
+        }
+
+        function updateCartCounter() {
+            document.getElementById('cartCounter').textContent = 
+                Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+        }
+
+        // Mostrar modal de pedido
+        function showOrderModal() {
+            if (Object.keys(cart).length === 0) {
+                alert('Tu carrito está vacío');
                 return;
             }
             
-            const user = validateNostrKey(nsec);
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentNostrUser', JSON.stringify(user));
-                showMainPage();
-            } else {
-                loginError.textContent = 'Clave no autorizada o inválida';
-                loginError.classList.remove('hidden');
-                showAlert('Acceso denegado: clave no autorizada', 'danger');
+            const modal = new bootstrap.Modal(document.getElementById('orderModal'));
+            resetModal();
+            updateOrderSummary();
+            modal.show();
+        }
+
+        function resetModal() {
+            document.getElementById('checkoutFormSection').style.display = 'block';
+            document.getElementById('copPaymentSection').style.display = 'none';
+            document.getElementById('bitcoinPaymentSection').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Actualizar resumen del pedido
+        function updateOrderSummary() {
+            let subtotal = 0;
+            let html = '<h5 class="mb-3">Resumen de tu pedido</h5>';
+            
+            Object.entries(cart).forEach(([productId, quantity]) => {
+                const product = products.find(p => p.id == productId);
+                if (product) {
+                    const productTotal = product.price * quantity;
+                    subtotal += productTotal;
+                    
+                    html += `
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>${product.name} x${quantity}</span>
+                            <span>$${productTotal.toLocaleString()}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+            const deliveryCost = deliveryMethod === 'delivery' ? DELIVERY_FEE : 0;
+            const total = subtotal + deliveryCost;
+            
+            html += `
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>$${subtotal.toLocaleString()}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Envío:</span>
+                    <span>$${deliveryCost.toLocaleString()}</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold">
+                    <span>Total:</span>
+                    <span>$${total.toLocaleString()}</span>
+                </div>
+            `;
+            
+            document.getElementById('orderSummary').innerHTML = html;
+        }
+
+        // Buscador de productos
+        function searchProducts() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(term) || 
+                p.description.toLowerCase().includes(term)
+            );
+            renderProducts(filtered.length > 0 ? filtered : products);
+        }
+
+        // Procesar pago
+        async function processPayment(paymentMethod) {
+            const form = document.getElementById('customerForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
             }
-        });
 
-        // Mostrar npub
-        showNpubBtn.addEventListener('click', () => {
-            if (currentUser) {
-                npubDisplay.textContent = `Tu identidad Nostr: ${currentUser.npub}`;
-                npubDisplay.classList.remove('hidden');
+            const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+            if (deliveryMethod === 'delivery' && !document.getElementById('customerAddress').value.trim()) {
+                alert('Por favor ingresa una dirección de envío válida');
+                return;
             }
-        });
 
-        // Logout
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('currentNostrUser');
-            currentUser = null;
-            showLoginPage();
-            showAlert('Sesión cerrada correctamente', 'info');
-        });
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('currentNostrUser');
-            if (savedUser) {
+            currentOrderId = 'ORD-' + Date.now().toString().slice(-8);
+
+            const subtotal = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+                const product = products.find(p => p.id == productId);
+                return sum + (product ? product.price * quantity : 0);
+            }, 0);
+
+            const deliveryCost = deliveryMethod === 'delivery' ? DELIVERY_FEE : 0;
+            const total = subtotal + deliveryCost;
+
+            // Estructura detallada para el Worker
+            const customerDetails = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                email: document.getElementById('customerEmail').value,
+                address: deliveryMethod === 'delivery' ? document.getElementById('customerAddress').value : 'Recoger en tienda'
+            };
+
+            const itemsDetails = Object.entries(cart).map(([productId, quantity]) => {
+                const product = products.find(p => p.id == productId);
+                return {
+                    id: productId,
+                    name: product.name,
+                    quantity: quantity,
+                    price: product.price,
+                    subtotal: product.price * quantity
+                };
+            });
+
+            const orderSummary = {
+                subtotal: subtotal,
+                deliveryFee: deliveryCost,
+                total: total,
+                paymentMethod: paymentMethod,
+                orderId: currentOrderId
+            };
+
+            // Mantener el mensaje detallado para compatibilidad
+            const detailedMessage = `
+                Cliente:
+                Nombre: ${customerDetails.name}
+                Teléfono: ${customerDetails.phone}
+                Email: ${customerDetails.email}
+                Dirección: ${customerDetails.address}
+                
+                Items:
+                ${itemsDetails.map(item => `
+                Producto: ${item.name}
+                Cantidad: ${item.quantity}
+                Precio unitario: $${item.price.toLocaleString()}
+                Subtotal: $${item.subtotal.toLocaleString()}
+                `).join('\n')}
+                
+                Resumen del pedido:
+                Subtotal: $${subtotal.toLocaleString()}
+                Costo de envío: $${deliveryCost.toLocaleString()}
+                Total: $${total.toLocaleString()}
+                Método de pago: ${paymentMethod}
+                ID del pedido: ${currentOrderId}
+            `;
+
+            const orderData = {
+                _subject: `Nuevo pedido ${currentOrderId}`,
+                name: customerDetails.name,
+                phone: customerDetails.phone,
+                email: customerDetails.email,
+                address: customerDetails.address,
+                paymentMethod: paymentMethod,
+                items: detailedMessage, // Mantener para compatibilidad
+                customerDetails: customerDetails, // Nuevo campo estructurado
+                itemsDetails: itemsDetails, // Nuevo campo estructurado
+                orderSummary: orderSummary, // Nuevo campo estructurado
+                itemsJson: JSON.stringify(itemsDetails), // Mantener para Formspree
+                subtotal: subtotal,
+                deliveryFee: deliveryCost,
+                total: total,
+                orderId: currentOrderId
+            };
+
+            try {
+                // Enviar a Cloudflare Worker
+                let workerSuccess = false;
                 try {
-                    currentUser = JSON.parse(savedUser);
-                    // Verificar que el usuario guardado sigue siendo válido
-                    if (authorizedKeys.users.some(u => u.nsec === currentUser.nsec)) {
-                        showMainPage();
-                        return;
+                    const workerResponse = await fetch(CLOUDFLARE_WORKER, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+                    if (workerResponse.ok) {
+                        workerSuccess = true;
+                    } else {
+                        console.error('Cloudflare Worker error:', workerResponse.status, await workerResponse.text());
                     }
-                } catch (e) {
-                    console.error("Error cargando sesión:", e);
+                } catch (workerError) {
+                    console.error('Cloudflare Worker failed:', workerError);
+                }
+
+                // Enviar a Formspree
+                let formspreeSuccess = false;
+                try {
+                    const formspreeResponse = await fetch(FORMSPREE_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+                    if (formspreeResponse.ok) {
+                        formspreeSuccess = true;
+                    } else {
+                        console.error('Formspree error:', formspreeResponse.status, await formspreeResponse.text());
+                    }
+                } catch (formspreeError) {
+                    console.error('Formspree failed:', formspreeError);
+                }
+
+                if (workerSuccess || formspreeSuccess) {
+                    // Mostrar instrucciones de pago inmediatamente después de éxito
+                    showPaymentInstructions(paymentMethod, total);
+                } else {
+                    throw new Error('Ambos envíos fallaron');
+                }
+
+            } catch (error) {
+                console.error('Error processing payment:', error);
+                document.getElementById('errorMessage').textContent = `Error al procesar el pedido: ${error.message}. Por favor intenta de nuevo o contáctanos.`;
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        }
+
+        function showPaymentInstructions(paymentMethod, total) {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('checkoutFormSection').style.display = 'none';
+            
+            if (paymentMethod === 'COP') {
+                document.getElementById('copTotalAmount').textContent = `$${total.toLocaleString()}`;
+                document.getElementById('copOrderNumber').textContent = currentOrderId;
+                document.getElementById('copPaymentSection').style.display = 'block';
+            } else {
+                document.getElementById('bitcoinTotalAmount').textContent = `$${total.toLocaleString()}`;
+                document.getElementById('bitcoinOrderNumber').textContent = currentOrderId;
+                document.getElementById('bitcoinPaymentSection').style.display = 'block';
+                
+                document.getElementById('qrCode').innerHTML = '';
+                new QRCode(document.getElementById('qrCode'), {
+                    text: `bitcoin:${BITCOIN_ADDRESS}?amount=${total}&message=Pedido ${currentOrderId}`,
+                    width: 200,
+                    height: 200
+                });
+            }
+        }
+
+        // Completar pedido
+        function completeOrder() {
+            document.getElementById('copPaymentSection').style.display = 'none';
+            document.getElementById('bitcoinPaymentSection').style.display = 'none';
+            document.getElementById('confirmedOrderNumber').textContent = currentOrderId;
+            document.getElementById('successMessage').style.display = 'block';
+            
+            setTimeout(() => {
+                cart = {};
+                updateCartCounter();
+                renderProducts();
+                bootstrap.Modal.getInstance(document.getElementById('orderModal')).hide();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>`;
                 }
             }
-            showLoginPage();
-        });
+            
+            // Si estamos en otra página y no está autenticado, redirigir a login
+            if (!window.location.pathname.endsWith('index.html') {
+                if (!sessionData || !sessionData.authenticated || new Date().getTime() >= sessionData.expiry) {
+                    window.location.href = "index.html";
+                }
+            }
+        }
     </script>
 </body>
 </html>
