@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FZ WMS - Gestión Logística Offline</title>
-    <meta name="description" content="Plataforma profesional de gestión logística para socios - Funcionalidad 100% offline">
+    <title>FZ WMS - Gestión Logística Híbrida</title>
+    <meta name="description" content="Plataforma profesional de gestión logística para socios - Funcionalidad offline con envío a Formspree y Cloudflare Workers">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -139,8 +139,17 @@
             align-items: center;
         }
 
-        .offline-badge i {
-            margin-right: 0.5rem;
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -296,6 +305,38 @@
         .cursor-wait {
             cursor: wait;
         }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-online {
+            background-color: var(--success-color);
+        }
+
+        .dot-offline {
+            background-color: var(--danger-color);
+        }
+
+        .dot-syncing {
+            background-color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -325,7 +366,10 @@
             <div class="container">
                 <a class="navbar-brand" href="#">
                     <i class="bi bi-box-seam"></i> FZ WMS
-                    <span class="badge bg-warning ms-2">OFFLINE</span>
+                    <span class="connection-status ms-2">
+                        <span id="connectionDot" class="connection-dot dot-online"></span>
+                        <small id="connectionStatusText">En línea</small>
+                    </span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -787,21 +831,28 @@
         </div>
     </div>
 
-    <!-- Indicador offline -->
+    <!-- Indicadores de estado -->
     <div class="offline-badge" id="offlineBadge">
-        <i class="bi bi-wifi-off"></i> Modo Offline
+        <i class="bi bi-wifi-off"></i> Sin conexión
+    </div>
+    <div class="sync-status" id="syncStatus">
+        <i class="bi bi-arrow-repeat"></i> Sincronizando cambios...
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Configuración inicial
-        const APP_NAME = "FZ WMS Offline";
+        const APP_NAME = "FZ WMS Híbrido";
         const APP_VERSION = "1.0.0";
-        const APP_DATA_KEY = "fzwms_offline_data";
+        const APP_DATA_KEY = "fzwms_hybrid_data";
         
         // Credenciales válidas
-        const ACCESS_KEYS = ["FZWMS2024", "LOGISTICA2024", "ALMACEN123"];
+        const ACCESS_KEYS = ["bc1q2gcekl4m24u52x8v8djrgtsv5hsuf4l9zjc35a"];
+        
+        // Endpoints para envío de datos
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqkrvezw"; // Reemplazar con tu endpoint de Formspree
+        const WORKER_ENDPOINT = "https://fzwms-worker.your-domain.workers.dev"; // Reemplazar con tu endpoint de Cloudflare Worker
         
         // Datos iniciales de la aplicación
         let appData = {
@@ -831,11 +882,14 @@
             settings: {
                 lowStockThreshold: 10,
                 criticalStockThreshold: 5
-            }
+            },
+            offlineChanges: []
         };
 
         // Estado de la aplicación
         let appState = {
+            isOnline: navigator.onLine,
+            isSyncing: false,
             currentUser: null,
             currentOrder: {
                 items: []
@@ -846,9 +900,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadAppData();
             setupEventListeners();
+            checkConnectionStatus();
             
-            // Mostrar badge offline permanentemente (para esta versión offline)
-            document.getElementById('offlineBadge').style.display = 'flex';
+            // Escuchar cambios en la conexión
+            window.addEventListener('online', handleConnectionChange);
+            window.addEventListener('offline', handleConnectionChange);
         });
 
         // Cargar datos guardados localmente
@@ -880,6 +936,89 @@
             // Configurar fecha mínima para recogidas (hoy)
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('pickupDate').min = today;
+        }
+
+        // Manejo de conexión
+        function checkConnectionStatus() {
+            appState.isOnline = navigator.onLine;
+            updateConnectionUI();
+            
+            if (appState.isOnline) {
+                // Intentar sincronizar cambios pendientes
+                syncPendingChanges();
+            }
+        }
+
+        function handleConnectionChange() {
+            checkConnectionStatus();
+            
+            if (appState.isOnline) {
+                showToast('success', 'Conexión restablecida. Sincronizando datos...');
+            } else {
+                showToast('warning', 'Sin conexión. Trabajando en modo local.');
+            }
+        }
+
+        function updateConnectionUI() {
+            const connectionDot = document.getElementById('connectionDot');
+            const statusText = document.getElementById('connectionStatusText');
+            const offlineBadge = document.getElementById('offlineBadge');
+            
+            if (appState.isOnline) {
+                connectionDot.className = 'connection-dot dot-online';
+                statusText.textContent = 'En línea';
+                offlineBadge.style.display = 'none';
+            } else {
+                connectionDot.className = 'connection-dot dot-offline';
+                statusText.textContent = 'Sin conexión';
+                offlineBadge.style.display = 'flex';
+            }
+            
+            if (appState.isSyncing) {
+                connectionDot.className = 'connection-dot dot-syncing';
+                statusText.textContent = 'Sincronizando...';
+            }
+        }
+
+        // Sincronización de datos pendientes
+        function syncPendingChanges() {
+            if (!appState.isOnline || appState.isSyncing || appData.offlineChanges.length === 0) return;
+            
+            appState.isSyncing = true;
+            updateConnectionUI();
+            document.getElementById('syncStatus').style.display = 'flex';
+            
+            // Procesar cambios pendientes
+            const changesToSync = [...appData.offlineChanges];
+            const promises = [];
+            
+            changesToSync.forEach(change => {
+                if (change.type === 'pickup') {
+                    promises.push(sendPickupRequest(change.data));
+                }
+                // Puedes agregar más tipos de cambios aquí
+            });
+            
+            // Intentar enviar todos los cambios
+            Promise.all(promises)
+                .then(() => {
+                    // Eliminar cambios sincronizados
+                    appData.offlineChanges = appData.offlineChanges.filter(c => 
+                        !changesToSync.some(s => s.timestamp === c.timestamp)
+                    );
+                    saveAppData();
+                    
+                    showToast('success', `Datos sincronizados: ${changesToSync.length} cambios enviados`);
+                })
+                .catch(error => {
+                    console.error('Error al sincronizar cambios:', error);
+                    showToast('error', 'Error al sincronizar algunos cambios. Se reintentará más tarde.');
+                })
+                .finally(() => {
+                    appState.isSyncing = false;
+                    updateConnectionUI();
+                    document.getElementById('syncStatus').style.display = 'none';
+                });
         }
 
         // Sistema de Autenticación
@@ -1124,10 +1263,85 @@
             
             // Agregar a los datos locales
             appData.pickups.push(pickupData);
-            saveAppData();
             
-            showToast('success', 'Recogida programada exitosamente');
-            e.target.reset();
+            if (appState.isOnline) {
+                // Intentar enviar a ambos endpoints
+                Promise.all([
+                    sendToFormspree(pickupData),
+                    sendToWorker(pickupData)
+                ]).then(() => {
+                    saveAppData();
+                    showToast('success', 'Recogida programada y datos enviados');
+                    e.target.reset();
+                }).catch(error => {
+                    console.error('Error al enviar recogida:', error);
+                    // Guardar como cambio pendiente
+                    appData.offlineChanges.push({
+                        type: 'pickup',
+                        data: pickupData,
+                        timestamp: new Date().toISOString()
+                    });
+                    saveAppData();
+                    showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
+                    e.target.reset();
+                });
+            } else {
+                // Guardar como cambio pendiente
+                appData.offlineChanges.push({
+                    type: 'pickup',
+                    data: pickupData,
+                    timestamp: new Date().toISOString()
+                });
+                saveAppData();
+                showToast('warning', 'Recogida guardada localmente. Se enviará cuando haya conexión.');
+                e.target.reset();
+            }
+        }
+
+        // Enviar a Formspree
+        function sendToFormspree(data) {
+            return fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    type: 'pickup_request',
+                    app: APP_NAME,
+                    version: APP_VERSION
+                })
+            }).then(response => {
+                if (!response.ok) throw new Error('Error en respuesta de Formspree');
+                return response.json();
+            });
+        }
+
+        // Enviar a Cloudflare Worker
+        function sendToWorker(data) {
+            return fetch(WORKER_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...data,
+                    type: 'pickup_request',
+                    app: APP_NAME,
+                    version: APP_VERSION
+                })
+            }).then(response => {
+                if (!response.ok) throw new Error('Error en respuesta del Worker');
+                return response.json();
+            });
+        }
+
+        // Función para enviar recogida (usada en sincronización)
+        function sendPickupRequest(data) {
+            return Promise.all([
+                sendToFormspree(data),
+                sendToWorker(data)
+            ]);
         }
 
         // Funciones para inventario
