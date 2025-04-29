@@ -82,7 +82,6 @@
         .footer-link {
             color: #ffffff;
             text-decoration: none;
-            Pr: none;
         }
         .footer-link:hover {
             text-decoration: underline;
@@ -100,210 +99,249 @@
             padding: 15px;
             margin-bottom: 15px;
         }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .carousel-item img {
+            height: 200px;
+            object-fit: contain;
+        }
+        .carousel-control-prev, .carousel-control-next {
+            background-color: rgba(0,0,0,0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">FZ2</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="https://www.facebook.com/share/g/1LeZfR3zJ2/">Facebook</a></li>
-                    <li class="nav-item"><a class="nav-link" href="https://chat.whatsapp.com/CMo21XbfE5hGFNzPl3wgMN">Whatsapp</a></li>
-                    <li class="nav-item"><a class="nav-link" href="https://www.google.com/maps?q=3.441764,-76.528070&ll=3.441764,-76.528070&z=15">Dirección</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tel:+573215296581">Celular</a></li>
-                    <li class="nav-item"><a class="nav-link" href="politicas.html">Políticas</a></li>
-                </ul>
-                <div class="d-flex">
-                    <button class="btn btn-outline-dark position-relative" onclick="showOrderModal()">
-                        <i class="bi bi-cart-fill"></i>
-                        <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">0</span>
-                    </button>
-                </div>
-            </div>
+    <!-- Login Section (visible by default) -->
+    <div id="loginSection" class="login-container">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        <div class="mb-3">
+            <label for="accessKey" class="form-label">Clave de Acceso</label>
+            <input type="password" class="form-control" id="accessKey" placeholder="Ingresa la clave">
         </div>
-    </nav>
-
-    <header class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">9Guarapo</h1>
-            <p class="lead">Los mejores productos al mejor precio</p>
-        </div>
-    </header>
-
-    <section class="py-3 bg-light">
-        <div class="container">
-            <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="Buscar productos..." oninput="searchProducts()">
-                <button class="btn btn-dark" type="button"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5">
-        <div class="container">
-            <div class="row g-4" id="productsContainer"></div>
-        </div>
-    </section>
-
-    <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tu Pedido</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="orderSummary"></div>
-                    
-                    <div id="checkoutFormSection">
-                        <div class="checkout-section">
-                            <h5>Método de Entrega</h5>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="deliveryMethod" id="pickup" value="pickup" checked>
-                                <label class="form-check-label" for="pickup">Recoger en tienda</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="deliveryMethod" id="delivery" value="delivery">
-                                <label class="form-check-label" for="delivery">Envío a domicilio (+$5,000)</label>
-                            </div>
-                            
-                            <form id="customerForm" class="mt-3" novalidate>
-                                <div class="mb-3">
-                                    <label for="customerName" class="form-label">Nombre completo*</label>
-                                    <input type="text" class="form-control" id="customerName" required minlength="3" pattern="[A-Za-z\s]+" title="El nombre solo debe contener letras y espacios">
-                                    <div class="invalid-feedback">Por favor ingresa un nombre válido (mínimo 3 caracteres, solo letras y espacios).</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="customerPhone" class="form-label">Teléfono*</label>
-                                    <input type="tel" class="form-control" id="customerPhone" required pattern="[0-9]{10}" title="El teléfono debe tener 10 dígitos">
-                                    <div class="invalid-feedback">Por favor ingresa un número de teléfono válido (10 dígitos).</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="customerEmail" class="form-label">Correo electrónico*</label>
-                                    <input type="email" class="form-control" id="customerEmail" required>
-                                    <div class="invalid-feedback">Por favor ingresa un correo electrónico válido.</div>
-                                </div>
-                                <div class="mb-3" id="addressField" style="display: none;">
-                                    <label for="customerAddress" class="form-label">Dirección completa*</label>
-                                    <input type="text" class="form-control" id="customerAddress" minlength="10" title="La dirección debe tener al menos 10 caracteres">
-                                    <div class="invalid-feedback">Por favor ingresa una dirección válida (mínimo 10 caracteres).</div>
-                                </div>
-                                
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                                    <button type="button" class="btn btn-primary me-md-2" onclick="processPayment('COP')">
-                                        <i class="bi bi-cash-coin"></i> Pagar con COP
-                                    </button>
-                                    <button type="button" class="btn btn-warning" onclick="processPayment('Bitcoin')">
-                                        <i class="bi bi-currency-bitcoin"></i> Pagar con Bitcoin
-                                    </button>
-                                </div>
-                            </form>
-                            
-                            <div class="text-center mt-3">
-                                <div id="loadingSpinner" class="spinner-border text-primary loading-spinner" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="copPaymentSection" class="cop-details" style="display: none;">
-                        <h4><i class="bi bi-cash-coin"></i> Pago en Pesos Colombianos</h4>
-                        <p>✅ Total a pagar: <strong id="copTotalAmount"></strong></p>
-                        <p>📝 Número de pedido: <strong id="copOrderNumber"></strong></p>
-                        
-                        <div class="bank-method">
-                            <h5><i class="bi bi-bank"></i> Transferencia Bancolombia</h5>
-                            <p><strong>Cuenta:</strong> 1234567890</p>
-                            <p><strong>Titular:</strong> Nombre del Titular</p>
-                            <p><strong>Tipo:</strong> Ahorros</p>
-                        </div>
-                        
-                        <div class="bank-method">
-                            <h5><i class="bi bi-phone"></i> Nequi</h5>
-                            <p><strong>Número:</strong> 3123456789</p>
-                            <p><strong>Titular:</strong> Nombre del Titular</p>
-                        </div>
-                        
-                        <div class="bank-method">
-                            <h5><i class="bi bi-wallet"></i> DaviPlata</h5>
-                            <p><strong>Número:</strong> 3123456789</p>
-                            <p><strong>Titular:</strong> Nombre del Titular</p>
-                        </div>
-                        
-                        <div class="alert alert-info mt-3">
-                            <p>💰 Por favor envía el monto exacto</p>
-                            <p>📦 Envía el comprobante por WhatsApp al <strong>3123456789</strong> con tu número de pedido</p>
-                        </div>
-                        
-                        <div class="d-grid mt-3">
-                            <button class="btn btn-success" onclick="completeOrder()">
-                                <i class="bi bi-check-circle"></i> Confirmar pago
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="bitcoinPaymentSection" class="payment-instructions" style="display: none;">
-                        <h4><i class="bi bi-currency-bitcoin"></i> Pago con Bitcoin</h4>
-                        <p>✅ Total a pagar: <strong id="bitcoinTotalAmount"></strong></p>
-                        <p>🔗 Dirección Bitcoin: <strong>1CAW26tepzcozWR58tMmSq5Sx44RCBtLXL</strong></p>
-                        <p>📝 Número de pedido: <strong id="bitcoinOrderNumber"></strong></p>
-                        
-                        <div id="qrCode" class="mb-3"></div>
-                        
-                        <div class="alert alert-warning">
-                            <p>⚠️ El cliente asume las comisiones de red</p>
-                            <p>📌 Incluye el número de pedido en el memo de la transacción</p>
-                        </div>
-                        
-                        <div class="d-grid mt-3">
-                            <button class="btn btn-success" onclick="completeOrder()">
-                                <i class="bi bi-check-circle"></i> Confirmar pago
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
-                        <h5><i class="bi bi-check-circle-fill"></i> ¡Pedido confirmado!</h5>
-                        <p>Tu pedido <strong id="confirmedOrderNumber"></strong> ha sido recibido.</p>
-                        <p>Nos comunicaremos contigo para confirmar el pago.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <button onclick="checkAccessKey()" class="btn btn-dark w-100">Acceder</button>
+        <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-1">FZ2 - Contraentregaco FZ</p>
-            <p class="mb-1" id="caliDateTime">Cali, Colombia: <span id="currentDateTime"></span></p>
-            <p class="mb-0"><a href="politicas.html" class="footer-link">Políticas de la empresa</a></p>
+    <!-- Main Content (hidden until login) -->
+    <div id="mainContent" style="display: none;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="#">FZ2</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link active" href="https://www.facebook.com/share/g/1LeZfR3zJ2/">Facebook</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://chat.whatsapp.com/CMo21XbfE5hGFNzPl3wgMN">Whatsapp</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://www.google.com/maps?q=3.441764,-76.528070&ll=3.441764,-76.528070&z=15">Dirección</a></li>
+                        <li class="nav-item"><a class="nav-link" href="tel:+573215296581">Celular</a></li>
+                        <li class="nav-item"><a class="nav-link" href="politicas.html">Políticas</a></li>
+                    </ul>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-dark position-relative" onclick="showOrderModal()">
+                            <i class="bi bi-cart-fill"></i>
+                            <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-section">
+            <div class="container text-center">
+                <h1 class="display-4 fw-bold mb-3">9Guarapo</h1>
+                <p class="lead">Los mejores productos al mejor precio</p>
+            </div>
+        </header>
+
+        <section class="py-3 bg-light">
+            <div class="container">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Buscar productos..." oninput="searchProducts()">
+                    <button class="btn btn-dark" type="button"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-5">
+            <div class="container">
+                <div class="row g-4" id="productsContainer"></div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Tu Pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="orderSummary"></div>
+                        
+                        <div id="checkoutFormSection">
+                            <div class="checkout-section">
+                                <h5>Método de Entrega</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="pickup" value="pickup" checked>
+                                    <label class="form-check-label" for="pickup">Recoger en tienda</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="delivery" value="delivery">
+                                    <label class="form-check-label" for="delivery">Envío a domicilio (+$5,000)</label>
+                                </div>
+                                
+                                <form id="customerForm" class="mt-3" novalidate>
+                                    <div class="mb-3">
+                                        <label for="customerName" class="form-label">Nombre completo*</label>
+                                        <input type="text" class="form-control" id="customerName" required minlength="3" pattern="[A-Za-z\s]+" title="El nombre solo debe contener letras y espacios">
+                                        <div class="invalid-feedback">Por favor ingresa un nombre válido (mínimo 3 caracteres, solo letras y espacios).</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="customerPhone" class="form-label">Teléfono*</label>
+                                        <input type="tel" class="form-control" id="customerPhone" required pattern="[0-9]{10}" title="El teléfono debe tener 10 dígitos">
+                                        <div class="invalid-feedback">Por favor ingresa un número de teléfono válido (10 dígitos).</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="customerEmail" class="form-label">Correo electrónico*</label>
+                                        <input type="email" class="form-control" id="customerEmail" required>
+                                        <div class="invalid-feedback">Por favor ingresa un correo electrónico válido.</div>
+                                    </div>
+                                    <div class="mb-3" id="addressField" style="display: none;">
+                                        <label for="customerAddress" class="form-label">Dirección completa*</label>
+                                        <input type="text" class="form-control" id="customerAddress" minlength="10" title="La dirección debe tener al menos 10 caracteres">
+                                        <div class="invalid-feedback">Por favor ingresa una dirección válida (mínimo 10 caracteres).</div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                                        <button type="button" class="btn btn-primary me-md-2" onclick="processPayment('COP')">
+                                            <i class="bi bi-cash-coin"></i> Pagar con COP
+                                        </button>
+                                        <button type="button" class="btn btn-warning" onclick="processPayment('Bitcoin')">
+                                            <i class="bi bi-currency-bitcoin"></i> Pagar con Bitcoin
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <div class="text-center mt-3">
+                                    <div id="loadingSpinner" class="spinner-border text-primary loading-spinner" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="copPaymentSection" class="cop-details" style="display: none;">
+                            <h4><i class="bi bi-cash-coin"></i> Pago en Pesos Colombianos</h4>
+                            <p>✅ Total a pagar: <strong id="copTotalAmount"></strong></p>
+                            <p>📝 Número de pedido: <strong id="copOrderNumber"></strong></p>
+                            
+                            <div class="bank-method">
+                                <h5><i class="bi bi-bank"></i> Transferencia Bancolombia</h5>
+                                <p><strong>Cuenta:</strong> 1234567890</p>
+                                <p><strong>Titular:</strong> Nombre del Titular</p>
+                                <p><strong>Tipo:</strong> Ahorros</p>
+                            </div>
+                            
+                            <div class="bank-method">
+                                <h5><i class="bi bi-phone"></i> Nequi</h5>
+                                <p><strong>Número:</strong> 3123456789</p>
+                                <p><strong>Titular:</strong> Nombre del Titular</p>
+                            </div>
+                            
+                            <div class="bank-method">
+                                <h5><i class="bi bi-wallet"></i> DaviPlata</h5>
+                                <p><strong>Número:</strong> 3123456789</p>
+                                <p><strong>Titular:</strong> Nombre del Titular</p>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <p>💰 Por favor envía el monto exacto</p>
+                                <p>📦 Envía el comprobante por WhatsApp al <strong>3123456789</strong> con tu número de pedido</p>
+                            </div>
+                            
+                            <div class="d-grid mt-3">
+                                <button class="btn btn-success" onclick="completeOrder()">
+                                    <i class="bi bi-check-circle"></i> Confirmar pago
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="bitcoinPaymentSection" class="payment-instructions" style="display: none;">
+                            <h4><i class="bi bi-currency-bitcoin"></i> Pago con Bitcoin</h4>
+                            <p>✅ Total a pagar: <strong id="bitcoinTotalAmount"></strong></p>
+                            <p>🔗 Dirección Bitcoin: <strong>1CAW26tepzcozWR58tMmSq5Sx44RCBtLXL</strong></p>
+                            <p>📝 Número de pedido: <strong id="bitcoinOrderNumber"></strong></p>
+                            
+                            <div id="qrCode" class="mb-3"></div>
+                            
+                            <div class="alert alert-warning">
+                                <p>⚠️ El cliente asume las comisiones de red</p>
+                                <p>📌 Incluye el número de pedido en el memo de la transacción</p>
+                            </div>
+                            
+                            <div class="d-grid mt-3">
+                                <button class="btn btn-success" onclick="completeOrder()">
+                                    <i class="bi bi-check-circle"></i> Confirmar pago
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+                            <h5><i class="bi bi-check-circle-fill"></i> ¡Pedido confirmado!</h5>
+                            <p>Tu pedido <strong id="confirmedOrderNumber"></strong> ha sido recibido.</p>
+                            <p>Nos comunicaremos contigo para confirmar el pago.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </footer>
+
+        <footer class="bg-dark text-white py-4 mt-5">
+            <div class="container text-center">
+                <p class="mb-1">FZ2 - Contraentregaco FZ</p>
+                <p class="mb-1" id="caliDateTime">Cali, Colombia: <span id="currentDateTime"></span></p>
+                <p class="mb-0"><a href="politicas.html" class="footer-link">Políticas de la empresa</a></p>
+            </div>
+        </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     
     <script>
         // Configuración
-        const BITCOIN_ADDRESS = "1CAW26tepzcozWR58tMmSq5Sx44RCBtLXL";
+        const BITCOIN_ADDRESS = "bc1q2gcekl4m24u52x8v8djrgtsv5hsuf4l9zjc35a";
         const FORMSPREE_ENDPOINT = "https://formspree.io/f/xyzererb";
         const CLOUDFLARE_WORKER = "https://fz1.fz1-27c.workers.dev/";
         const DELIVERY_FEE = 5000;
+        const ACCESS_KEY = "bc1q2gcekl4m24u52x8v8djrgtsv5hsuf4l9zjc35a"; // Clave de acceso almacenada internamente
 
-        // Datos de productos
+        // Datos de productos con múltiples imágenes
         const products = [
             {
                 id: 1,
-                name: "1",
+                name: "Producto Premium",
                 price: 120000,
                 inventory: 15,
-                image: "1/1.jpg",
+                images: [
+                    "https://via.placeholder.com/300/FF0000/FFFFFF?text=Producto+1",
+                    "https://via.placeholder.com/300/00FF00/FFFFFF?text=Producto+1",
+                    "https://via.placeholder.com/300/0000FF/FFFFFF?text=Producto+1"
+                ],
                 description: "Producto de alta calidad con garantía de 1 año.",
                 onSale: true
             },
@@ -312,7 +350,10 @@
                 name: "Producto Estándar",
                 price: 80000,
                 inventory: 30,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/FF00FF/FFFFFF?text=Producto+2",
+                    "https://via.placeholder.com/300/FFFF00/FFFFFF?text=Producto+2"
+                ],
                 description: "Producto confiable para uso diario.",
                 onSale: false
             },
@@ -321,7 +362,9 @@
                 name: "Producto Económico",
                 price: 50000,
                 inventory: 50,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/00FFFF/FFFFFF?text=Producto+3"
+                ],
                 description: "Solución económica sin perder calidad.",
                 onSale: true
             },
@@ -330,7 +373,10 @@
                 name: "Producto Deluxe",
                 price: 150000,
                 inventory: 10,
-                image: "https://via.placeholder.com/300",
+                images: [
+                    "https://via.placeholder.com/300/FFA500/FFFFFF?text=Producto+4",
+                    "https://via.placeholder.com/300/800080/FFFFFF?text=Producto+4"
+                ],
                 description: "Edición especial con características exclusivas.",
                 onSale: false
             }
@@ -339,13 +385,13 @@
         // Variables globales
         let cart = {};
         let currentOrderId = "";
+        let isAuthenticated = false;
 
-        // Inicialización
+        // Verificar autenticación al cargar
         document.addEventListener('DOMContentLoaded', function() {
-            renderProducts();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
+            checkAuthentication();
             
+            // Manejar cambios en el método de entrega
             document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.getElementById('addressField').style.display = 
@@ -354,6 +400,45 @@
                 });
             });
         });
+
+        // Verificar si el usuario está autenticado
+        function checkAuthentication() {
+            const savedKey = localStorage.getItem('accessKey');
+            if (savedKey === ACCESS_KEY) {
+                isAuthenticated = true;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                initializeApp();
+            } else {
+                isAuthenticated = false;
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+                
+                // Redirigir a login si intentan acceder a otra página
+                if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
+                    window.location.href = '/index.html';
+                }
+            }
+        }
+
+        // Verificar clave de acceso
+        function checkAccessKey() {
+            const enteredKey = document.getElementById('accessKey').value;
+            if (enteredKey === ACCESS_KEY) {
+                localStorage.setItem('accessKey', ACCESS_KEY);
+                checkAuthentication();
+            } else {
+                document.getElementById('loginError').textContent = 'Clave incorrecta. Intenta de nuevo.';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Inicializar la aplicación después del login
+        function initializeApp() {
+            renderProducts();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        }
 
         // Actualizar fecha y hora
         function updateDateTime() {
@@ -372,14 +457,34 @@
                 new Date().toLocaleString('es-CO', options);
         }
 
-        // Renderizar productos
+        // Renderizar productos con carrusel de imágenes
         function renderProducts(productsToShow = products) {
             const container = document.getElementById('productsContainer');
             container.innerHTML = productsToShow.map(product => `
                 <div class="col-md-4 col-lg-3">
                     <div class="card product-card h-100">
                         ${product.onSale ? '<span class="badge bg-danger badge-sale">SALE</span>' : ''}
-                        <img src="${product.image}" class="card-img-top p-3" alt="${product.name}">
+                        
+                        <div id="productCarousel-${product.id}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                ${product.images.map((img, index) => `
+                                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                        <img src="${img}" class="d-block w-100 p-3" alt="${product.name}">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${product.images.length > 1 ? `
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel-${product.id}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel-${product.id}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                        
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text text-muted small">${product.description}</p>
@@ -403,6 +508,11 @@
 
         // Funciones del carrito
         function addToCart(productId) {
+            if (!isAuthenticated) {
+                alert('Por favor inicia sesión primero');
+                return;
+            }
+            
             const product = products.find(p => p.id === productId);
             if (!product || (cart[productId] || 0) >= product.inventory) {
                 return alert('No hay suficiente inventario');
@@ -413,6 +523,11 @@
         }
 
         function adjustQuantity(productId, change) {
+            if (!isAuthenticated) {
+                alert('Por favor inicia sesión primero');
+                return;
+            }
+            
             const product = products.find(p => p.id === productId);
             if (!product) return;
             
@@ -438,6 +553,11 @@
 
         // Mostrar modal de pedido
         function showOrderModal() {
+            if (!isAuthenticated) {
+                alert('Por favor inicia sesión primero');
+                return;
+            }
+            
             if (Object.keys(cart).length === 0) {
                 alert('Tu carrito está vacío');
                 return;
